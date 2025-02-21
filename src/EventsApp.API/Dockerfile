@@ -7,10 +7,13 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["EventsApp.API/EventsApp.API.csproj", "EventsApp.API/"]
-RUN dotnet restore "EventsApp.API/EventsApp.API.csproj"
+COPY ["src/EventsApp.API/EventsApp.API.csproj", "src/EventsApp.API/"]
+COPY ["src/EventsApp.BLL/EventsApp.BLL.csproj", "src/EventsApp.BLL/"]
+COPY ["src/EventsApp.DAL/EventsApp.DAL.csproj", "src/EventsApp.DAL/"]
+COPY ["src/EventsApp.Domain/EventsApp.Domain.csproj", "src/EventsApp.Domain/"]
+RUN dotnet restore "src/EventsApp.API/EventsApp.API.csproj"
 COPY . .
-WORKDIR "/src/EventsApp.API"
+WORKDIR "/src/src/EventsApp.API"
 RUN dotnet build "EventsApp.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish

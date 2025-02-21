@@ -3,11 +3,13 @@ services:
     container_name: api
     image: event.api
     build:
-      # yml directory
-      context: ..
-      dockerfile: ./src/EventsApp.API/Dockerfile
+      # from yml directory (context for dockerfile)
+      context: ../
+      dockerfile: src/EventsApp.API/Dockerfile
     depends_on:
       - postgres
+    networks:
+      - eventsApp
     
   postgres:
     container_name: postgres
@@ -17,9 +19,16 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+      PGPORT: ${POSTGRES_CONTAINER_PORT}
     volumes:
-      - events_app_postgres_data:/var/lib/postgres/data
+      - ./postgres:/var/lib/postgresql/data
     ports:
-      - "${POSTGRES_PORT}:5468"
-volumes:
-  events_app_postgres_data:
+      - "${POSTGRES_LOCAL_PORT}:${POSTGRES_CONTAINER_PORT}"
+    networks:
+      - eventsApp
+    
+#volumes:
+#  events_app_postgres_data:
+#    
+networks:
+  eventsApp:

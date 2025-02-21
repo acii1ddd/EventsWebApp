@@ -34,7 +34,7 @@ namespace EventsApp.DAL.Migrations
 
                     b.HasIndex("ParticipantsId");
 
-                    b.ToTable("EventEntityParticipantEntity");
+                    b.ToTable("EventEntityParticipantEntity", (string)null);
                 });
 
             modelBuilder.Entity("EventsApp.DAL.Entities.EventEntity", b =>
