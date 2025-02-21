@@ -14,6 +14,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{20EEF0
 		docker\.env = docker\.env
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{BB490934-2D91-4BF0-A6F9-CEA7AD00CFCA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventApp.DAL.Tests", "tests\EventApp.DAL.Tests\EventApp.DAL.Tests.csproj", "{CA117104-41FB-49C3-B4F9-1C0CF0F005D2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +40,12 @@ Global
 		{8904965D-176D-497D-9975-45A6FB033DBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8904965D-176D-497D-9975-45A6FB033DBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8904965D-176D-497D-9975-45A6FB033DBC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA117104-41FB-49C3-B4F9-1C0CF0F005D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA117104-41FB-49C3-B4F9-1C0CF0F005D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA117104-41FB-49C3-B4F9-1C0CF0F005D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA117104-41FB-49C3-B4F9-1C0CF0F005D2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{CA117104-41FB-49C3-B4F9-1C0CF0F005D2} = {BB490934-2D91-4BF0-A6F9-CEA7AD00CFCA}
 	EndGlobalSection
 EndGlobal

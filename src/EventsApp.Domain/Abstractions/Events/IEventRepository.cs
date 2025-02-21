@@ -4,5 +4,5 @@ namespace EventsApp.Domain.Abstractions.Events;
 
 public interface IEventRepository : IRepository<EventModel>
 {
-    // crud
+    public Task<EventModel?> GetByNameAsync(string name);
 }
