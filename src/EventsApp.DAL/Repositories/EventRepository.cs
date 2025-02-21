@@ -118,7 +118,6 @@ public class EventRepository : IEventRepository
         return _mapper.Map<EventModel>(entity);
     }
     
-
     // обобщить
     
     /// <summary>

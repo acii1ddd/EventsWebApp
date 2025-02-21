@@ -1,5 +1,6 @@
 using EventsApp.DAL.Context;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 namespace Backend;
 
@@ -24,6 +25,12 @@ public class Program
             options.UseNpgsql(connectionString);
         });
 
+        builder.Host.UseSerilog((context, configuration) =>
+        {
+            configuration.ReadFrom.Configuration(context.Configuration);
+            configuration.Enrich.FromLogContext();
+        });
+        
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
@@ -36,7 +43,16 @@ public class Program
         app.UseHttpsRedirection();
 
         app.UseAuthorization();
-        
-        app.Run();
+
+        var logger = app.Services.GetRequiredService<ILogger<Program>>();
+
+        try
+        {
+            app.Run();
+        }
+        catch (Exception e)
+        {
+            logger.LogError("Произошла ошибка при работе приложения {error}", e);
+        }
     }
 }
