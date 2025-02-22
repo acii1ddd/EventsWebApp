@@ -25,9 +25,9 @@ public class ParticipantEntity
     /// <summary>
     /// Refresh token участника
     /// </summary>
-    public Guid RefreshTokenId { get; set; }
-
     public RefreshTokenEntity RefreshToken { get; set; } = null!;
+    
+    //public Guid RefreshTokenId { get; set; }
 }
 
 public class ParticipantEntityConfiguration : IEntityTypeConfiguration<ParticipantEntity>
@@ -62,6 +62,6 @@ public class ParticipantEntityConfiguration : IEntityTypeConfiguration<Participa
         // связь с таблицей токенов
         builder.HasOne(x => x.RefreshToken)
             .WithOne(x => x.Participant)
-            .HasForeignKey<ParticipantEntity>(x => x.RefreshTokenId);
+            .HasForeignKey<RefreshTokenEntity>(x => x.ParticipantId);
     }
 }

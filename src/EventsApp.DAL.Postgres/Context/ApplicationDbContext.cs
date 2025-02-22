@@ -15,7 +15,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<ParticipantEntity> Participants { get; set; }
     
     public DbSet<RefreshTokenEntity> RefreshTokens { get; set; }
-
+    
+    public DbSet<ImageFileEntity> ImageFiles { get; set; }
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

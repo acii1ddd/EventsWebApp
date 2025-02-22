@@ -1,4 +1,4 @@
-﻿namespace EventsApp.Domain.Models;
+﻿namespace EventsApp.Domain.Models.Events;
 
 public class EventModel
 {
@@ -19,7 +19,5 @@ public class EventModel
     /// <summary>
     /// Изображение события
     /// </summary>
-    public Guid ImageId { get; set; }
+    public ImageFileModel ImageFileModel { get; set; } = null!;
 }
-
-

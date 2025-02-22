@@ -3,6 +3,7 @@ using EventsApp.DAL.Context;
 using EventsApp.DAL.Entities;
 using EventsApp.DAL.Repositories;
 using EventsApp.Domain.Models;
+using EventsApp.Domain.Models.Events;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 
@@ -46,7 +47,6 @@ public class EventRepositoryTests
                 Location = "Test Location1",
                 Category = "Test Category1",
                 MaxParticipants = 50,
-                ImageId = Guid.NewGuid(),
             },
             
             new EventEntity
@@ -58,7 +58,6 @@ public class EventRepositoryTests
                 Location = "Test Location2",
                 Category = "Test Category2",
                 MaxParticipants = 80,
-                ImageId = Guid.NewGuid(),
             }
         };
         

@@ -2,7 +2,7 @@ using AutoMapper;
 using EventsApp.DAL.Context;
 using EventsApp.DAL.Entities;
 using EventsApp.Domain.Abstractions.Events;
-using EventsApp.Domain.Models;
+using EventsApp.Domain.Models.Events;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventsApp.DAL.Repositories;
@@ -54,7 +54,7 @@ public class EventRepository : IEventRepository
         return _mapper.Map<EventModel>(
             await _context.Events
                 .AsNoTracking()
-                .Where(x => x.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase))
+                .Where(x => x.Name.ToLower() == name.ToLower())
                 .FirstOrDefaultAsync()
         );
     }

@@ -11,6 +11,4 @@ public interface IRepository<T>
     public Task<T?> UpdateAsync(T newEntity);
 
     public Task<T?> DeleteByIdAsync(Guid id);
-    
-    
 }

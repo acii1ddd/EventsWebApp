@@ -4,3 +4,4 @@ bin/
 obj/
 *.user
 docker/postgres
+docker/minio

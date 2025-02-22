@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EventsApp.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250220181455_initial")]
-    partial class initial
+    [Migration("20250222142954_addFileTable")]
+    partial class addFileTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -56,9 +56,6 @@ namespace EventsApp.DAL.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<Guid>("ImageId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("Location")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -78,6 +75,54 @@ namespace EventsApp.DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Events", (string)null);
+                });
+
+            modelBuilder.Entity("EventsApp.DAL.Entities.ImageFile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("BucketName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Extension")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<long>("Length")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("MimeType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("StoragePath")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("UploadDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventId")
+                        .IsUnique();
+
+                    b.ToTable("ImageFiles", (string)null);
                 });
 
             modelBuilder.Entity("EventsApp.DAL.Entities.ParticipantEntity", b =>
@@ -101,9 +146,6 @@ namespace EventsApp.DAL.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
-
-                    b.Property<Guid>("RefreshTokenId")
-                        .HasColumnType("uuid");
 
                     b.Property<string>("Surname")
                         .IsRequired()
@@ -160,6 +202,17 @@ namespace EventsApp.DAL.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("EventsApp.DAL.Entities.ImageFile", b =>
+                {
+                    b.HasOne("EventsApp.DAL.Entities.EventEntity", "Event")
+                        .WithOne("ImageFile")
+                        .HasForeignKey("EventsApp.DAL.Entities.ImageFile", "EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Event");
+                });
+
             modelBuilder.Entity("EventsApp.DAL.Entities.RefreshTokenEntity", b =>
                 {
                     b.HasOne("EventsApp.DAL.Entities.ParticipantEntity", "Participant")
@@ -169,6 +222,12 @@ namespace EventsApp.DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("Participant");
+                });
+
+            modelBuilder.Entity("EventsApp.DAL.Entities.EventEntity", b =>
+                {
+                    b.Navigation("ImageFile")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("EventsApp.DAL.Entities.ParticipantEntity", b =>

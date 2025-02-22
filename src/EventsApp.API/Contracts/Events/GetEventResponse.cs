@@ -1,5 +1,6 @@
 using AutoMapper;
 using EventsApp.Domain.Models;
+using EventsApp.Domain.Models.Events;
 
 namespace EventsApp.API.Contracts.Events;
 

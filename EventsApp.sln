@@ -4,7 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventsApp.API", "src\Events
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventsApp.Domain", "src\EventsApp.Domain\EventsApp.Domain.csproj", "{9EC91257-1556-4ABC-958D-E2532ECE6CA9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventsApp.DAL", "src\EventsApp.DAL\EventsApp.DAL.csproj", "{A50FE95F-F34A-4097-983C-A6B0F0F1EE20}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventsApp.DAL.Postgres", "src\EventsApp.DAL.Postgres\EventsApp.DAL.Postgres.csproj", "{A50FE95F-F34A-4097-983C-A6B0F0F1EE20}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventsApp.BLL", "src\EventsApp.BLL\EventsApp.BLL.csproj", "{8904965D-176D-497D-9975-45A6FB033DBC}"
 EndProject

@@ -1,4 +1,4 @@
-using EventsApp.Domain.Models;
+using EventsApp.Domain.Models.Events;
 
 namespace EventsApp.Domain.Abstractions.Events;
 

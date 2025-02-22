@@ -1,9 +1,14 @@
+using Amazon;
+using Amazon.Runtime;
+using Amazon.S3;
+using EventsApp.API.ConfigModels;
 using EventsApp.API.ConfigurationDI;
 using EventsApp.BLL.ConfigurationDI;
 using EventsApp.DAL;
 using EventsApp.DAL.ConfigurationDI;
 using EventsApp.DAL.Context;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Serilog;
 
 namespace EventsApp.API;
@@ -32,6 +37,23 @@ public class Program
         {
             configuration.ReadFrom.Configuration(context.Configuration);
             configuration.Enrich.FromLogContext();
+        });
+        
+        // configure S3
+        builder.Services.Configure<S3Options>(builder.Configuration.GetSection("S3Options"));
+        builder.Services.AddSingleton<IAmazonS3>(sp =>
+        {
+            var awsOptions = sp.GetRequiredService<IOptions<S3Options>>().Value;
+            
+            var config = new AmazonS3Config
+            {
+                RegionEndpoint = RegionEndpoint.GetBySystemName(awsOptions.Region),
+                ServiceURL = awsOptions.ServiceUrl,
+                UseHttp = awsOptions.UseHttp,
+            };
+            var credentials = new BasicAWSCredentials(awsOptions.AccessKey, awsOptions.SecretKey);
+            
+            return new AmazonS3Client(credentials, config);
         });
 
         // registration
@@ -70,7 +92,7 @@ public class Program
 
         try
         {
-            app.Run();
+            await app.RunAsync();
         }
         catch (Exception e)
         {

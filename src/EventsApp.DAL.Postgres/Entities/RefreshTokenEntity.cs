@@ -37,6 +37,8 @@ public class RefreshTokenEntityConfiguration : IEntityTypeConfiguration<RefreshT
         builder.Property(x => x.ExpiryDate).IsRequired();
         builder.Property(x => x.CreatedDate).IsRequired();
 
+        builder.HasIndex(x => x.ParticipantId).IsUnique();
+        
         builder.HasOne(x => x.Participant)
             .WithOne(x => x.RefreshToken)
             .HasForeignKey<RefreshTokenEntity>(x => x.ParticipantId);

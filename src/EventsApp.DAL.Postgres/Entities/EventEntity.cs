@@ -18,11 +18,14 @@ public class EventEntity
     public string Category { get; set; } = string.Empty;
     
     public int MaxParticipants { get; set; }
-    
+
     /// <summary>
     /// Изображение события
     /// </summary>
-    public Guid ImageId { get; set; }
+    public ImageFileEntity ImageFileEntity { get; set; } = null!;
+    
+    // Не используется в связях
+    //public Guid ImageId { get; set; }
     
     /// <summary>
     /// Участники события
@@ -59,11 +62,14 @@ public class EventEntityConfiguration : IEntityTypeConfiguration<EventEntity>
             .HasMaxLength(MaxLength);
         
         builder.Property(x => x.MaxParticipants).IsRequired();
-        
-        builder.Property(x => x.ImageId).IsRequired();
 
         // связь с таблицей участников
         builder.HasMany(x => x.Participants)
             .WithMany(x => x.Events);
+        
+        // связь с таблицей картинок
+        builder.HasOne(x => x.ImageFileEntity)
+            .WithOne(x => x.Event)
+            .HasForeignKey<ImageFileEntity>(x => x.EventId);
     }
 }

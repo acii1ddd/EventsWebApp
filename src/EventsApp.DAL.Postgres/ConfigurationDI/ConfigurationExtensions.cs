@@ -1,5 +1,6 @@
 using EventsApp.DAL.Repositories;
 using EventsApp.Domain.Abstractions.Events;
+using EventsApp.Domain.Abstractions.Files;
 using EventsApp.Domain.Abstractions.Participants;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,6 +12,7 @@ public static class ConfigurationExtensions
     {
         services.AddScoped<IEventRepository, EventRepository>();
         services.AddScoped<IParticipantRepository, ParticipantRepository>();
+        services.AddScoped<IFileStorageRepository, FileStorageRepository>();
         return services;
     }
 
