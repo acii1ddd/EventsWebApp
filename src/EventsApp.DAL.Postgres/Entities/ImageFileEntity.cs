@@ -69,7 +69,7 @@ public class ImageFileConfiguration : IEntityTypeConfiguration<ImageFileEntity>
         
         // связь с таблицей событий
         builder.HasOne(x => x.Event)
-            .WithOne(x => x.ImageFileEntity)
+            .WithOne(x => x.ImageFile)
             .HasForeignKey<ImageFileEntity>(x => x.EventId);
     }
 }

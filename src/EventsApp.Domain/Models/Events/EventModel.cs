@@ -16,8 +16,8 @@ public class EventModel
     
     public int MaxParticipants { get; set; }
     
-    /// <summary>
-    /// Изображение события
-    /// </summary>
     public string ImageUrl { get; set; } = string.Empty;
+    
+    
+    public ImageFileModel ImageFile { get; set; } = null!;
 }

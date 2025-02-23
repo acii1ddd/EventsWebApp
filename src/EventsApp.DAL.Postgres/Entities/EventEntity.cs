@@ -22,7 +22,7 @@ public class EventEntity
     /// <summary>
     /// Изображение события
     /// </summary>
-    public ImageFileEntity ImageFileEntity { get; set; } = null!;
+    public ImageFileEntity ImageFile { get; set; } = null!;
     
     // Не используется в связях
     //public Guid ImageId { get; set; }
@@ -68,7 +68,7 @@ public class EventEntityConfiguration : IEntityTypeConfiguration<EventEntity>
             .WithMany(x => x.Events);
         
         // связь с таблицей картинок
-        builder.HasOne(x => x.ImageFileEntity)
+        builder.HasOne(x => x.ImageFile)
             .WithOne(x => x.Event)
             .HasForeignKey<ImageFileEntity>(x => x.EventId);
     }

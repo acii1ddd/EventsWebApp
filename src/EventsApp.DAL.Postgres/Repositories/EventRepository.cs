@@ -27,6 +27,7 @@ public class EventRepository : IEventRepository
         return _mapper.Map<List<EventModel>>(
             await _context.Events
                 .AsNoTracking()
+                .Include(x => x.ImageFile)
                 .ToListAsync()
         );
     }
@@ -40,6 +41,7 @@ public class EventRepository : IEventRepository
         return _mapper.Map<EventModel>(
             await _context.Events
                 .AsNoTracking()
+                .Include(x => x.ImageFile)
                 .FirstOrDefaultAsync(x => x.Id == id)
         );
     }
@@ -55,6 +57,7 @@ public class EventRepository : IEventRepository
             await _context.Events
                 .AsNoTracking()
                 .Where(x => x.Name.ToLower() == name.ToLower())
+                .Include(x => x.ImageFile)
                 .FirstOrDefaultAsync()
         );
     }
@@ -105,6 +108,7 @@ public class EventRepository : IEventRepository
     {
         var entity = _context.Events
             .AsNoTracking()
+            .Include(x => x.ImageFile)
             .FirstOrDefault(x => x.Id == id);
 
         if (entity is null)

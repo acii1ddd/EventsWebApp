@@ -65,7 +65,8 @@ public class FileStorageRepository : IFileStorageRepository
             return null;
         }
         
-        _context.ImageFiles.Update(image);
+        var imageEntity = _mapper.Map<ImageFileEntity>(imageFile);
+        _context.ImageFiles.Update(imageEntity);
         await _context.SaveChangesAsync();
         return _mapper.Map<ImageFileModel>(image);
     }

@@ -4,11 +4,11 @@ using EventsApp.Domain.Models.Events;
 
 namespace EventsApp.API.MappingProfiles;
 
-public class AddEventDataProfile : Profile
+public class UpdateEventDataProfile : Profile
 {
-    public AddEventDataProfile()
+    public UpdateEventDataProfile()
     {
-        CreateMap<AddEventWithImageRequest, EventModel>()
+        CreateMap<UpdateEventWithImageRequest, EventModel>()
             // парсим EventData (из AddEventWithImageRequest) в EventModel 
             .ForMember(dest => dest.Name, opt
                 => opt.MapFrom(src => src.EventData.Name))

@@ -35,14 +35,13 @@ public class EventController : ControllerBase
     // /events/guid
     [HttpGet("{eventId:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<GetEventResponse>))]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetByIdAsync([FromRoute] Guid eventId)
     {
         var eventModel = await _eventService.GetByIdAsync(eventId);
 
-        if (eventModel is null)
-        {
-            return NoContent();
+        if (eventModel is null) {
+            return NotFound();
         }
         
         var result = _mapper.Map<GetEventResponse>(eventModel);
@@ -52,14 +51,13 @@ public class EventController : ControllerBase
     // /events/name
     [HttpGet("{name}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetEventResponse))]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetByNameAsync([FromRoute] string name)
     {
         var eventModel = await _eventService.GetByNameAsync(name);
 
-        if (eventModel is null)
-        {
-            return NoContent();
+        if (eventModel is null) {
+            return NotFound();
         }
         
         var result = _mapper.Map<GetEventResponse>(eventModel);
@@ -72,24 +70,66 @@ public class EventController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> AddAsync([FromForm] AddEventWithImageRequest request)
     {
-        // валидация FluentValidation
+        // TODO: Валидация FluentValidation
         var eventModel = _mapper.Map<EventModel>(request);
+       
+        await using var stream = request.ImageFile?.OpenReadStream();
+        var fileName = request.ImageFile?.FileName ?? string.Empty;
+        var contentType = request.ImageFile?.ContentType ?? string.Empty;
         
-        await using var stream = request.ImageFile.OpenReadStream();
+        var addedEventModel = await _eventService.AddAsync(eventModel, stream, 
+            fileName, contentType);
         
-        var addedEventModel = await _eventService.AddAsync(
-            eventModel,
-            stream ?? throw new NullReferenceException("Stream is null."),
-            request.ImageFile.FileName ?? throw new NullReferenceException("ImageFile is null."),
-            request.ImageFile.ContentType ?? throw new NullReferenceException("ImageFile is null.")
-        );
-
-        if (addedEventModel.IsFailed)
-        {
+        if (addedEventModel.IsFailed) {
             return BadRequest(addedEventModel.Errors);
         }
         
         var result = _mapper.Map<GetEventResponse>(addedEventModel.Value);
+        return Ok(result);
+    }
+
+    // events/guid
+    [HttpPut("{eventId:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetEventResponse))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateAsync([FromRoute] Guid eventId, 
+        [FromForm] UpdateEventWithImageRequest request)
+    {
+        // TODO: Валидация FluentValidation для UpdateEventWithImageRequest.EventData
+        var eventModel = _mapper.Map<EventModel>(request);
+        eventModel.Id = eventId;
+        
+        // поток для обновления изображения в minio
+        await using var stream = request.ImageFile.OpenReadStream();
+        
+        var updatedEventModel = await _eventService.UpdateAsync(
+            eventModel, 
+            stream, 
+            request.ImageFile.FileName, 
+            request.ImageFile.ContentType
+        );
+
+        if (updatedEventModel is null) {
+            return NotFound();
+        }
+        
+        var result = _mapper.Map<GetEventResponse>(updatedEventModel);
+        return Ok(result);
+    }
+
+    [HttpDelete("{eventId:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetEventResponse))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeleteAsync([FromRoute] Guid eventId)
+    {
+        var deletedEventModel = await _eventService.DeleteAsync(eventId);
+        
+        if (deletedEventModel is null)
+        {
+            return NotFound();
+        }
+
+        var result = _mapper.Map<GetEventResponse>(deletedEventModel);
         return Ok(result);
     }
 }
