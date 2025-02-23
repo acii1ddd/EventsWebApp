@@ -1,0 +1,49 @@
+services:
+  api:
+    container_name: api
+    image: event.api
+    build:
+      # from yml directory (context for dockerfile)
+      context: ../
+      dockerfile: src/EventsApp.API/Dockerfile
+    depends_on:
+      - postgres
+    networks:
+      - eventsApp
+    
+  postgres:
+    container_name: postgres
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      PGPORT: ${POSTGRES_CONTAINER_PORT}
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_LOCAL_PORT}:${POSTGRES_CONTAINER_PORT}"
+    networks:
+      - eventsApp
+    
+  minio:
+    container_name: minio
+    image: minio/minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command: server --console-address ":9001" /data
+    volumes:
+      - ./minio:/data
+    ports:
+      - "${MINIO_LOCAL_PORT}:9000"
+      - "${MINIO_LOCAL_PORT_WEB}:9001"
+    networks:
+      - eventsApp
+    
+#volumes:
+#  events_app_postgres_data:
+#    
+networks:
+  eventsApp:

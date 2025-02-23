@@ -1,0 +1,51 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventsApp.API", "src\EventsApp.API\EventsApp.API.csproj", "{4FAD578B-4602-49B9-A9C6-C9AA12D13029}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventsApp.Domain", "src\EventsApp.Domain\EventsApp.Domain.csproj", "{9EC91257-1556-4ABC-958D-E2532ECE6CA9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventsApp.DAL.Postgres", "src\EventsApp.DAL.Postgres\EventsApp.DAL.Postgres.csproj", "{A50FE95F-F34A-4097-983C-A6B0F0F1EE20}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventsApp.BLL", "src\EventsApp.BLL\EventsApp.BLL.csproj", "{8904965D-176D-497D-9975-45A6FB033DBC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{20EEF06E-009D-49BA-B292-F3D2EFCF3CE0}"
+	ProjectSection(SolutionItems) = preProject
+		docker\docker-compose.yml = docker\docker-compose.yml
+		docker\.env = docker\.env
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{BB490934-2D91-4BF0-A6F9-CEA7AD00CFCA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventApp.DAL.Tests", "tests\EventApp.DAL.Tests\EventApp.DAL.Tests.csproj", "{CA117104-41FB-49C3-B4F9-1C0CF0F005D2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4FAD578B-4602-49B9-A9C6-C9AA12D13029}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FAD578B-4602-49B9-A9C6-C9AA12D13029}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4FAD578B-4602-49B9-A9C6-C9AA12D13029}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4FAD578B-4602-49B9-A9C6-C9AA12D13029}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9EC91257-1556-4ABC-958D-E2532ECE6CA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9EC91257-1556-4ABC-958D-E2532ECE6CA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9EC91257-1556-4ABC-958D-E2532ECE6CA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9EC91257-1556-4ABC-958D-E2532ECE6CA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A50FE95F-F34A-4097-983C-A6B0F0F1EE20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A50FE95F-F34A-4097-983C-A6B0F0F1EE20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A50FE95F-F34A-4097-983C-A6B0F0F1EE20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A50FE95F-F34A-4097-983C-A6B0F0F1EE20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8904965D-176D-497D-9975-45A6FB033DBC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8904965D-176D-497D-9975-45A6FB033DBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8904965D-176D-497D-9975-45A6FB033DBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8904965D-176D-497D-9975-45A6FB033DBC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA117104-41FB-49C3-B4F9-1C0CF0F005D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA117104-41FB-49C3-B4F9-1C0CF0F005D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA117104-41FB-49C3-B4F9-1C0CF0F005D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA117104-41FB-49C3-B4F9-1C0CF0F005D2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{CA117104-41FB-49C3-B4F9-1C0CF0F005D2} = {BB490934-2D91-4BF0-A6F9-CEA7AD00CFCA}
+	EndGlobalSection
+EndGlobal
