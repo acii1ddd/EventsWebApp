@@ -28,12 +28,6 @@ public class EventController : ControllerBase
     public async Task<IActionResult> GetAllAsync()
     {
         var events = await _eventService.GetAllAsync();
-
-        if (events.Count == 0)
-        {
-            return NoContent();
-        }
-        
         var result = _mapper.Map<List<GetEventResponse>>(events);
         return Ok(result);
     }
@@ -81,14 +75,13 @@ public class EventController : ControllerBase
         // валидация FluentValidation
         var eventModel = _mapper.Map<EventModel>(request);
         
-        await using var stream = request.ImageFile?.OpenReadStream();
+        await using var stream = request.ImageFile.OpenReadStream();
         
         var addedEventModel = await _eventService.AddAsync(
             eventModel,
             stream ?? throw new NullReferenceException("Stream is null."),
-            request.ImageFile?.FileName ?? throw new NullReferenceException("ImageFile is null."),
-            request.ImageFile?.ContentType ?? throw new NullReferenceException("ImageFile is null."),
-            _authorizedUserId
+            request.ImageFile.FileName ?? throw new NullReferenceException("ImageFile is null."),
+            request.ImageFile.ContentType ?? throw new NullReferenceException("ImageFile is null.")
         );
 
         if (addedEventModel.IsFailed)
@@ -98,61 +91,5 @@ public class EventController : ControllerBase
         
         var result = _mapper.Map<GetEventResponse>(addedEventModel.Value);
         return Ok(result);
-    }
-
-
-    // public class AddEventWithImageRequestProfile : Profile
-    // {
-    //     public AddEventWithImageRequestProfile()
-    //     {
-    //         CreateMap<AddEventWithImageRequest, EventModel>()
-    //             // парсим EventData в EventModel (из json)
-    //             .ForMember(dest => dest.Name, opt
-    //                 => opt.MapFrom(src => src.EventData.Name))
-    //             .ForMember(dest => dest.Description, opt
-    //                 => opt.MapFrom(src => src.EventData.Description))
-    //             .ForMember(dest => dest.StartDate, opt
-    //                 => opt.MapFrom(src => src.EventData.StartDate))
-    //             .ForMember(dest => dest.Location, opt
-    //                 => opt.MapFrom(src => src.EventData.Location))
-    //             .ForMember(dest => dest.Category, opt
-    //                 => opt.MapFrom(src => src.EventData.Category))
-    //             .ForMember(dest => dest.MaxParticipants, opt
-    //                 => opt.MapFrom(src => src.EventData.MaxParticipants));
-    //         // парсим IFormFile в ImageFile, который содержится в EventModel
-    //         // .ForMember(dest => dest.ImageFileModel, opt
-    //         //     => opt.MapFrom(src => new ImageFileModel
-    //         //     {
-    //         //         Id = Guid.Empty,
-    //         //         BucketName = "default",
-    //         //         StoragePath = "default",
-    //         //         Name = src.ImageFile != null ? src.ImageFile.FileName : string.Empty,
-    //         //         Length = src.ImageFile != null ? src.ImageFile.Length : 0,
-    //         //         MimeType = src.ImageFile != null ? src.ImageFile.ContentType : string.Empty,
-    //         //         Extension = src.ImageFile != null ? Path.GetExtension(src.ImageFile.FileName) : string.Empty,
-    //         //         UploadDate = DateTime.UtcNow
-    //         //     }));
-    //     }
-    // }
-    
-    public class AddEventDataProfile : Profile
-    {
-        public AddEventDataProfile()
-        {
-            CreateMap<AddEventWithImageRequest, EventModel>()
-                // парсим EventData в EventModel (из json)
-                .ForMember(dest => dest.Name, opt
-                    => opt.MapFrom(src => src.EventData.Name))
-                .ForMember(dest => dest.Description, opt
-                    => opt.MapFrom(src => src.EventData.Description))
-                .ForMember(dest => dest.StartDate, opt
-                    => opt.MapFrom(src => src.EventData.StartDate))
-                .ForMember(dest => dest.Location, opt
-                    => opt.MapFrom(src => src.EventData.Location))
-                .ForMember(dest => dest.Category, opt
-                    => opt.MapFrom(src => src.EventData.Category))
-                .ForMember(dest => dest.MaxParticipants, opt
-                    => opt.MapFrom(src => src.EventData.MaxParticipants));
-        }
     }
 }

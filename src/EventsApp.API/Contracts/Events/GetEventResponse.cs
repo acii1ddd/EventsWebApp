@@ -23,7 +23,7 @@ public class GetEventResponse
     /// <summary>
     /// Изображение события
     /// </summary>
-    public Guid ImageId { get; init; }
+    public string ImageUrl { get; init; } = string.Empty;
 }
 
 public class GetEventResponseProfile : Profile

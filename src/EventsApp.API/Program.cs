@@ -1,4 +1,3 @@
-using Amazon;
 using Amazon.Runtime;
 using Amazon.S3;
 using EventsApp.API.ConfigModels;
@@ -47,13 +46,18 @@ public class Program
             
             var config = new AmazonS3Config
             {
-                RegionEndpoint = RegionEndpoint.GetBySystemName(awsOptions.Region),
+                //RegionEndpoint = RegionEndpoint.GetBySystemName(awsOptions.Region),
                 ServiceURL = awsOptions.ServiceUrl,
                 UseHttp = awsOptions.UseHttp,
+                ForcePathStyle = awsOptions.ForcePathStyle // пути через / (для minio)
             };
             var credentials = new BasicAWSCredentials(awsOptions.AccessKey, awsOptions.SecretKey);
             
-            return new AmazonS3Client(credentials, config);
+            var s3Client = new AmazonS3Client(credentials, config);
+            // блокир основной поток для создания бакета
+            EnsureBucketExistsAsync(s3Client).GetAwaiter().GetResult();
+                
+            return s3Client;
         });
 
         // registration
@@ -97,6 +101,23 @@ public class Program
         catch (Exception e)
         {
             logger.LogError("Произошла ошибка при работе приложения {error}", e);
+        }
+    }
+
+    /// <summary>
+    /// Создание бакета если его еще нету 
+    /// </summary>
+    /// <param name="s3Client"></param>
+    public static async Task EnsureBucketExistsAsync(AmazonS3Client s3Client)
+    {
+        const string bucketName = "event-pictures";
+        try
+        {
+            await s3Client.GetBucketLocationAsync(bucketName);
+        }
+        catch (AmazonS3Exception e) when(e.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            await s3Client.PutBucketAsync(bucketName);
         }
     }
 }

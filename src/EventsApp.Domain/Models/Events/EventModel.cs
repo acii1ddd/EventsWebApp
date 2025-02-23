@@ -19,5 +19,5 @@ public class EventModel
     /// <summary>
     /// Изображение события
     /// </summary>
-    public ImageFileModel ImageFileModel { get; set; } = null!;
+    public string ImageUrl { get; set; } = string.Empty;
 }

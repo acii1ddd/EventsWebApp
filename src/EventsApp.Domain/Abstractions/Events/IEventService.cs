@@ -11,6 +11,5 @@ public interface IEventService
     
     public Task<EventModel?> GetByNameAsync(string name);
 
-    public Task<Result<EventModel>> AddAsync(EventModel eventModel, Stream fileStream, string fileName, string mimeType,
-        Guid userId);
+    public Task<Result<EventModel>> AddAsync(EventModel eventModel, Stream fileStream, string fileName, string mimeType);
 }

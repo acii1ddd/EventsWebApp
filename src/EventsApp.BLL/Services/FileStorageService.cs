@@ -12,7 +12,7 @@ public class FileStorageService : IFileStorageService
     private readonly IFileStorageRepository _fileStorageRepository;
     private readonly ILogger<FileStorageService> _logger;
     
-    private const string BucketName = "EventPictures";
+    private const string BucketName = "event-pictures";
 
     public FileStorageService(IAmazonS3 s3Client, IFileStorageRepository fileStorageRepository, ILogger<FileStorageService> logger)
     {
@@ -21,23 +21,22 @@ public class FileStorageService : IFileStorageService
         _logger = logger;
     }
 
-    private static string GetKey(Guid fileId, Guid eventId)
+    private static string GetPath(string bucketName, string key)
     { 
-        return $"{eventId.ToString()}/{fileId.ToString()}";
+        return $"{BucketName}/{key}";
     }
     
-    public async Task<ImageFileModel> UploadAsync(Stream fileStream, string fileName, string mimeType, Guid eventId)
+    public async Task<string> UploadAsync(Stream fileStream, string fileName, string mimeType, Guid eventId)
     {
         var fileId = Guid.NewGuid();
-        var key = GetKey(eventId, fileId);
-        
+
         // Размер необходимо зафиксировать до того, как будет вычитан поток
         // который освободится после прочтения
         var streamLength = fileStream.Length;
 
         await _s3Client.PutObjectAsync(new PutObjectRequest
         {
-            Key = key,
+            Key = fileId.ToString(),
             BucketName = BucketName,
             InputStream = fileStream,
             ContentType = mimeType
@@ -47,7 +46,7 @@ public class FileStorageService : IFileStorageService
         {
             Id = fileId,
             BucketName = BucketName,
-            StoragePath = $"{BucketName}/{key}",
+            StoragePath = GetPath(BucketName, fileId.ToString()),
             Name = fileName,
             Length = streamLength,
             MimeType = mimeType,
@@ -56,9 +55,41 @@ public class FileStorageService : IFileStorageService
             EventId = eventId
         };
 
-        var result = await _fileStorageRepository.AddAsync(imageFile);
+        _ = await _fileStorageRepository.AddAsync(imageFile);
         _logger.LogInformation("Файл {fileName} успешно добавлен в хранилище", imageFile.Name);
+
+        var url = new GetPreSignedUrlRequest
+        {
+            BucketName = BucketName,
+            Key = fileId.ToString(),
+            Expires = DateTime.UtcNow.AddMinutes(10),
+            Protocol = Protocol.HTTP
+        };
         
-        return result;
+        var imageUrl = await _s3Client.GetPreSignedURLAsync(url);
+        return imageUrl;
+    }
+    
+    public async Task<string> GetPreSignedUrl(Guid eventId)
+    {
+        var imageFile = await _fileStorageRepository.GetByEventIdAsync(eventId);
+        
+        // у события нет картинки
+        if (imageFile is null)
+        {
+            _logger.LogInformation("Событие {eventId} не имеет изображения", eventId);
+            return string.Empty;
+        }
+        
+        var url = new GetPreSignedUrlRequest
+        {
+            BucketName = BucketName,
+            Key = imageFile.Id.ToString(),
+            Expires = DateTime.UtcNow.AddMinutes(10),
+            Protocol = Protocol.HTTP
+        };
+        
+        var imageUrl = await _s3Client.GetPreSignedURLAsync(url);
+        return imageUrl;
     }
 }

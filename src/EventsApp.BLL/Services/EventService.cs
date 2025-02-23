@@ -23,12 +23,31 @@ public class EventService : IEventService
 
     public async Task<List<EventModel>> GetAllAsync()
     {
-        return await _eventRepository.GetAllAsync();
+        var eventModels = await _eventRepository.GetAllAsync();
+
+        if (eventModels.Count == 0)
+        {
+            return [];
+        }
+
+        foreach (var eventModel in eventModels)
+        {
+            eventModel.ImageUrl = await _fileStorageService.GetPreSignedUrl(eventModel.Id);
+        }
+        return eventModels;
     }
     
     public async Task<EventModel?> GetByIdAsync(Guid eventId)
     {
-        return await _eventRepository.GetByIdAsync(eventId);
+        var eventModel = await _eventRepository.GetByIdAsync(eventId);
+
+        if (eventModel is null)
+        {
+            return null;
+        }
+        
+        eventModel.ImageUrl = await _fileStorageService.GetPreSignedUrl(eventModel.Id);
+        return eventModel;
     }
 
     public async Task<EventModel?> GetByNameAsync(string name)
@@ -43,19 +62,20 @@ public class EventService : IEventService
     /// <param name="fileStream"></param>
     /// <param name="fileName"></param>
     /// <param name="mimeType"></param>
-    /// <param name="userId"></param>
-    /// <returns>Добавленное изображение</returns>
-    public async Task<Result<EventModel>> AddAsync(EventModel eventModel, Stream fileStream, string fileName, string mimeType, Guid userId)
+    /// <returns>Добавленное событие и его изображение</returns>
+    public async Task<Result<EventModel>> AddAsync(EventModel eventModel, Stream fileStream, string fileName, string mimeType)
     {
         try
         {
             var eventId = Guid.NewGuid();
-            
-            var imageFileModel = await _fileStorageService.UploadAsync(fileStream, fileName, mimeType, eventId);
-            
             eventModel.Id = eventId;
+            
             var result = await _eventRepository.AddAsync(eventModel);
-        
+            
+            // сохранение картинки события
+            var imageUrl = await _fileStorageService.UploadAsync(fileStream, fileName, mimeType, eventId);
+            result.ImageUrl = imageUrl;
+            
             _logger.LogInformation("Событие {eventName} успешно добавлено", eventModel.Name);
             
             return result;

@@ -4,5 +4,5 @@ public class AddEventWithImageRequest
 {
     public AddEventRequest EventData { get; init; } = null!;
 
-    public IFormFile? ImageFile { get; init; }
+    public IFormFile ImageFile { get; init; } = null!;
 }

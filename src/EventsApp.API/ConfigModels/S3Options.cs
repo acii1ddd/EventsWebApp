@@ -6,6 +6,8 @@ public class S3Options
     
     public string ServiceUrl { get; set; } = string.Empty;
     
+    public bool ForcePathStyle { get; set; } = false;
+    
     public bool UseHttp { get; set; }
 
     public string AccessKey { get; set; } = string.Empty;

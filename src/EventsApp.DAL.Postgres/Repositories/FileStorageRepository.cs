@@ -36,6 +36,15 @@ public class FileStorageRepository : IFileStorageRepository
         );
     }
     
+    public async Task<ImageFileModel?> GetByEventIdAsync(Guid eventId)
+    {
+        return _mapper.Map<ImageFileModel>(
+            await _context.ImageFiles
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.EventId == eventId)
+        );
+    }
+    
     public async Task<ImageFileModel> AddAsync(ImageFileModel imageFile)
     {
         var imageFileEntity = _mapper.Map<ImageFileEntity>(imageFile);
