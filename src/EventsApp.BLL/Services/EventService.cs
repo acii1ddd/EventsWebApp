@@ -1,7 +1,10 @@
+using EventsApp.API.Errors;
 using EventsApp.Domain.Abstractions.Events;
 using EventsApp.Domain.Abstractions.Files;
+using EventsApp.Domain.Models;
 using EventsApp.Domain.Models.Events;
 using FluentResults;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 namespace EventsApp.BLL.Services;
@@ -20,19 +23,19 @@ public class EventService : IEventService
         _logger = logger;
     }
 
-    public async Task<List<EventModel>> GetAllAsync()
+    public async Task<PaginatedList<EventModel>> GetAllAsync(int pageIndex, int pageSize)
     {
-        var eventModels = await _eventRepository.GetAllAsync();
+        var events = await _eventRepository.GetAllAsync(pageIndex, pageSize);
     
-        if (eventModels.Count == 0) {
-            return [];
+        if (events.Items.Count == 0) {
+            return events;
         }
     
-        foreach (var eventModel in eventModels)
+        foreach (var eventModel in events.Items)
         {
             eventModel.ImageUrl = await _fileStorageService.GetPreSignedUrl(eventModel.ImageFile);
         }
-        return eventModels;
+        return events;
     }
     
     public async Task<EventModel?> GetByIdAsync(Guid eventId)
@@ -63,31 +66,31 @@ public class EventService : IEventService
     /// Добавление события с его изображением
     /// </summary>
     /// <param name="eventModel"></param>
-    /// <param name="fileStream"></param>
-    /// <param name="fileName"></param>
-    /// <param name="mimeType"></param>
+    /// <param name="imageFile"></param>
     /// <returns>Добавленное событие и его изображение</returns>
-    public async Task<Result<EventModel>> AddAsync(EventModel eventModel, Stream? fileStream, 
-        string fileName, string mimeType)
+    public async Task<Result<EventModel>> AddAsync(EventModel eventModel, IFormFile? imageFile)
     {
         try
         {
             var eventId = Guid.NewGuid();
             eventModel.Id = eventId;
+            eventModel.StartDate = eventModel.StartDate.ToUniversalTime();
             
             var result = await _eventRepository.AddAsync(eventModel);
             
             // у события нет изображения
-            if (fileStream is null) {
+            if (imageFile is null) {
                 return result;
             }
             
             // сохранение изображение события
-            var imageUrl = await _fileStorageService.UploadAsync(fileStream, fileName, mimeType, eventId);
+            await using var fileStream = imageFile.OpenReadStream();
+
+            var imageUrl = await _fileStorageService
+                .UploadAsync(fileStream, imageFile.FileName, imageFile.ContentType, eventId);
             result.ImageUrl = imageUrl;
             
             _logger.LogInformation("Событие {eventName} успешно добавлено", eventModel.Name);
-            
             return result;
         }
         catch (Exception e)
@@ -98,17 +101,22 @@ public class EventService : IEventService
     }
     
     public async Task<EventModel?> UpdateAsync(EventModel eventModel,
-        Stream fileStream, string fileName, string mimeType)
+        IFormFile imageFile)
     {
+        // сохраняем дату в utc
+        eventModel.StartDate = eventModel.StartDate.ToUniversalTime();
         var updatedEventModel = await _eventRepository.UpdateAsync(eventModel);
 
         if (updatedEventModel is null) {
             return null;
         }
 
+        // поток для обновления изображения в minio
+        await using var fileStream = imageFile.OpenReadStream();
+        
         // обновляем изображение события
-        var imageUrl = await _fileStorageService.UpdateAsync(fileStream, fileName, 
-            mimeType, updatedEventModel.Id);
+        var imageUrl = await _fileStorageService.UpdateAsync(fileStream, imageFile.FileName, 
+            imageFile.ContentType, updatedEventModel.Id);
         
         updatedEventModel.ImageUrl = imageUrl;
         return updatedEventModel;
@@ -126,5 +134,44 @@ public class EventService : IEventService
         await _fileStorageService.DeleteAsync(deletedEventModel.ImageFile);
         return deletedEventModel;
     }
-}
 
+    public async Task<PaginatedList<EventModel>> GetByFilter(DateTime? date, string? location, 
+        string? category, int pageIndex, int pageSize)
+    {
+        var events = await _eventRepository
+            .GetByFilterAsync(date, location, category, pageIndex, pageSize);
+
+        if (events.Items.Count == 0) {
+            return events;
+        }
+        
+        foreach (var eventModel in events.Items)
+        {
+            eventModel.ImageUrl = await _fileStorageService.GetPreSignedUrl(eventModel.ImageFile);
+        }
+        return events;
+    }
+
+    public async Task<Result<string>> AddImageAsync(Guid eventId, IFormFile imageFile)
+    {
+        var eventModel = await _eventRepository.GetByIdAsync(eventId);
+
+        if (eventModel is null)
+        {
+            _logger.LogWarning("Событие {eventId} не найдено", eventId);
+            return Result.Fail(new NotFoundError(eventId));
+        }
+        if (eventModel?.ImageFile is not null)
+        {
+            _logger.LogWarning("Событие {eventId} уже имеет изображение", eventId);
+            return Result.Fail(new Error($"Событие {eventId} уже имеет изображение"));
+        }
+        
+        await using var stream = imageFile.OpenReadStream();
+        var imageUrl = await _fileStorageService.UploadAsync(stream, imageFile.ContentType, 
+            imageFile.ContentType, eventId);
+        
+        _logger.LogInformation("Изображение успешно добавлено к событию {eventId}", eventId);
+        return imageUrl;
+    }
+}

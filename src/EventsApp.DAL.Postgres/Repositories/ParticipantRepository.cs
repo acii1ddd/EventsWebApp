@@ -5,7 +5,7 @@ namespace EventsApp.DAL.Repositories;
 
 public class ParticipantRepository : IParticipantRepository
 {
-    public Task<List<ParticipantModel>> GetAllAsync()
+    public Task<PaginatedList<ParticipantModel>> GetAllAsync(int pageIndex, int pageSize)
     {
         throw new NotImplementedException();
     }

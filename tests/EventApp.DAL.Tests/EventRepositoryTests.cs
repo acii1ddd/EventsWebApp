@@ -79,13 +79,13 @@ public class EventRepositoryTests
         _contextMock.Setup(m => m.Events).Returns(dbSetMock.Object);
         
         // Act
-        var result = await _repository.GetAllAsync();
+        var result = await _repository.GetAllAsync(1, 1);
 
         // Assert
         Assert.NotNull(result);
         Assert.IsType<List<EventEntity>>(result);
-        Assert.Equal(result.Count, eventEntities.Count);
-        Assert.Equal(result.First().Id, eventEntities.First().Id);
+        Assert.Equal(result.Items.Count, eventEntities.Count);
+        Assert.Equal(result.Items.First().Id, eventEntities.First().Id);
     }
 }
 

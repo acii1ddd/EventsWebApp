@@ -1,8 +1,10 @@
+using EventsApp.Domain.Models;
+
 namespace EventsApp.Domain.Abstractions;
 
 public interface IRepository<T>
 {
-    public Task<List<T>> GetAllAsync();
+    public Task<PaginatedList<T>> GetAllAsync(int pageIndex, int pageSize);
     
     public Task<T?> GetByIdAsync(Guid id);
     

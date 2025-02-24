@@ -2,6 +2,7 @@ using AutoMapper;
 using EventsApp.DAL.Context;
 using EventsApp.DAL.Entities;
 using EventsApp.Domain.Abstractions.Events;
+using EventsApp.Domain.Models;
 using EventsApp.Domain.Models.Events;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,14 +23,20 @@ public class EventRepository : IEventRepository
     /// Получение списка всех событий
     /// </summary>
     /// <returns>Список событий либо пустой список</returns>
-    public async Task<List<EventModel>> GetAllAsync()
+    public async Task<PaginatedList<EventModel>> GetAllAsync(int pageIndex, int pageSize)
     {
-        return _mapper.Map<List<EventModel>>(
-            await _context.Events
-                .AsNoTracking()
-                .Include(x => x.ImageFile)
-                .ToListAsync()
+        var items = _mapper.Map<List<EventModel>>(await _context.Events
+            .AsNoTracking()
+            .OrderBy(x => x.StartDate)
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize)
+            .Include(x => x.ImageFile)
+            .ToListAsync()
         );
+        
+        var totalRecords = items.Count;
+        var totalPages = (int) Math.Ceiling(totalRecords / (double)pageSize);
+        return new PaginatedList<EventModel>(items, pageIndex, totalPages);
     }
 
     /// <summary>
@@ -45,8 +52,7 @@ public class EventRepository : IEventRepository
                 .FirstOrDefaultAsync(x => x.Id == id)
         );
     }
-
-
+    
     /// <summary>
     /// Получение события по его названию
     /// </summary>
@@ -97,8 +103,6 @@ public class EventRepository : IEventRepository
         return _mapper.Map<EventModel>(eventEntity);
     }
     
-    // подумать про patch частичное изменение
-
     /// <summary>
     /// Удаление события
     /// </summary>
@@ -121,16 +125,17 @@ public class EventRepository : IEventRepository
         
         return _mapper.Map<EventModel>(entity);
     }
-    
-    // обобщить
-    
+
     /// <summary>
     ///  Получение событий по критериям
     /// </summary>
     /// <param name="minDate"></param>
     /// <param name="location"></param>
     /// <param name="category"></param>
-    public async Task<List<EventModel>> GetByFilterAsync(DateTime? minDate, string? location, string? category)
+    /// <param name="pageIndex"></param>
+    /// <param name="pageSize"></param>
+    public async Task<PaginatedList<EventModel>> GetByFilterAsync(DateTime? minDate, string? location, 
+        string? category, int pageIndex, int pageSize)
     {
         var query = _context.Events.AsNoTracking();
 
@@ -148,9 +153,19 @@ public class EventRepository : IEventRepository
         {
             query = query.Where(x => x.Category.Contains(category));
         }
+        
+        var totalRecords = await query.CountAsync();
+        
+        // округляем в большую сторону, чтобы забрать последнюю неполную страницу
+        var totalPages = (int) Math.Ceiling(totalRecords / (double)pageSize);
 
-        return _mapper.Map<List<EventModel>>(
-            await query.ToListAsync()
+        var items = _mapper.Map<List<EventModel>>(await query
+            .OrderBy(x => x.StartDate)
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize)
+            .Include(x => x.ImageFile)
+            .ToListAsync()
         );
+        return new PaginatedList<EventModel>(items, pageIndex, totalPages);
     }
 }

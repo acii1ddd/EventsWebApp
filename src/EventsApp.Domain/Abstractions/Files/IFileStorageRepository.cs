@@ -1,4 +1,5 @@
 using EventsApp.Domain.Models;
+using EventsApp.Domain.Models.Images;
 
 namespace EventsApp.Domain.Abstractions.Files;
 
