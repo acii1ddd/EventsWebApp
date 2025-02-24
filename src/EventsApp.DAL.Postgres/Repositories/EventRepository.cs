@@ -102,7 +102,6 @@ public class EventRepository : IEventRepository
         var eventEntity = _mapper.Map<EventEntity>(newEventModel);
         _context.Events.Update(eventEntity);
         await _context.SaveChangesAsync();
-        
         return _mapper.Map<EventModel>(eventEntity);
     }
     

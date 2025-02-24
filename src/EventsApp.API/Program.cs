@@ -1,13 +1,14 @@
 using Amazon.Runtime;
 using Amazon.S3;
-using EventsApp.API.ConfigModels;
 using EventsApp.API.ConfigurationDI;
 using EventsApp.BLL.ConfigurationDI;
+using EventsApp.Configuration;
 using EventsApp.DAL;
 using EventsApp.DAL.ConfigurationDI;
 using EventsApp.DAL.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Query.Expressions.Internal;
 using Serilog;
 
 namespace EventsApp.API;
@@ -66,6 +67,10 @@ public class Program
             .RegisterDalProfiles()
             .RegisterServices()
             .AddContractProfiles();
+        
+        // auth settings
+        builder.Services.Configure<AuthSettings>(builder.Configuration.GetSection("AuthSettings") 
+            ?? throw new ApplicationException($"Секция {nameof(AuthSettings)} не найдена в конфигурационном файле"));
             
         var app = builder.Build();
 

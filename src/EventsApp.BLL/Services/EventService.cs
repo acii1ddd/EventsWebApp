@@ -1,6 +1,6 @@
-using EventsApp.API.Errors;
 using EventsApp.Domain.Abstractions.Events;
 using EventsApp.Domain.Abstractions.Files;
+using EventsApp.Domain.Errors;
 using EventsApp.Domain.Models;
 using EventsApp.Domain.Models.Events;
 using FluentResults;
@@ -159,7 +159,7 @@ public class EventService : IEventService
         if (eventModel is null)
         {
             _logger.LogWarning("Событие {eventId} не найдено", eventId);
-            return Result.Fail(new NotFoundError(eventId));
+            return Result.Fail(new EventWithIdNotFoundError(eventId));
         }
         if (eventModel?.ImageFile is not null)
         {

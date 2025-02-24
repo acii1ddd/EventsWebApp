@@ -1,7 +1,7 @@
 using AutoMapper;
 using EventsApp.API.Contracts.Events;
-using EventsApp.API.Errors;
 using EventsApp.Domain.Abstractions.Events;
+using EventsApp.Domain.Errors;
 using EventsApp.Domain.Models.Events;
 using FluentResults;
 using Microsoft.AspNetCore.Mvc;
@@ -156,6 +156,6 @@ public class EventController : ControllerBase
         }
         
         var error = imageUrlResult.Errors.First();
-        return error is NotFoundError ? NotFound(error) : BadRequest(error);
+        return error is EventWithIdNotFoundError ? NotFound(error) : BadRequest(error);
     }
 }

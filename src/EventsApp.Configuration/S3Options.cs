@@ -1,4 +1,4 @@
-namespace EventsApp.API.ConfigModels;
+namespace EventsApp.Configuration;
 
 public class S3Options
 {
