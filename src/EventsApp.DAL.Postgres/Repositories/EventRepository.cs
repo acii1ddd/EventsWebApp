@@ -25,16 +25,19 @@ public class EventRepository : IEventRepository
     /// <returns>Список событий либо пустой список</returns>
     public async Task<PaginatedList<EventModel>> GetAllAsync(int pageIndex, int pageSize)
     {
-        var items = _mapper.Map<List<EventModel>>(await _context.Events
+        var query = _context.Events
             .AsNoTracking()
-            .OrderBy(x => x.StartDate)
+            .OrderBy(x => x.StartDate);
+        
+        var totalRecords = await query.CountAsync(); 
+        
+        var items = _mapper.Map<List<EventModel>>(await query
             .Skip((pageIndex - 1) * pageSize)
             .Take(pageSize)
             .Include(x => x.ImageFile)
             .ToListAsync()
         );
         
-        var totalRecords = items.Count;
         var totalPages = (int) Math.Ceiling(totalRecords / (double)pageSize);
         return new PaginatedList<EventModel>(items, pageIndex, totalPages);
     }
@@ -141,17 +144,17 @@ public class EventRepository : IEventRepository
 
         if (minDate.HasValue)
         {
-            query = query.Where(x => x.StartDate >= minDate);
+            query = query.Where(x => x.StartDate >= minDate.Value.ToUniversalTime());
         }
         
         if (!string.IsNullOrEmpty(location))
         {
-            query = query.Where(x => x.Location.Contains(location));
+            query = query.Where(x => x.Location.ToLower().Contains(location.ToLower()));
         }
         
         if (!string.IsNullOrEmpty(category))
         {
-            query = query.Where(x => x.Category.Contains(category));
+            query = query.Where(x => x.Category.ToLower().Contains(category.ToLower()));
         }
         
         var totalRecords = await query.CountAsync();
