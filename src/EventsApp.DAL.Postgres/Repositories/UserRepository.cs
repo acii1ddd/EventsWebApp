@@ -23,9 +23,13 @@ public class UserRepository : IUserRepository
         throw new NotImplementedException();
     }
 
-    public Task<UserModel?> GetByIdAsync(Guid id)
+    public async Task<UserModel?> GetByIdAsync(Guid id)
     {
-        throw new NotImplementedException();
+        return _mapper.Map<UserModel>(
+            await _context.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == id)
+        );
     }
 
     public Task<UserModel> AddAsync(UserModel entity)

@@ -71,6 +71,6 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<UserEntity>
         // связь с таблицей токенов
         builder.HasOne(x => x.RefreshToken)
             .WithOne(x => x.User)
-            .HasForeignKey<RefreshTokenEntity>(x => x.ParticipantId);
+            .HasForeignKey<RefreshTokenEntity>(x => x.UserId);
     }
 }

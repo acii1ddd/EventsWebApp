@@ -31,6 +31,7 @@
 
     <ItemGroup>
       <Folder Include="ConfigModels\" />
+      <Folder Include="Contracts\Users\" />
     </ItemGroup>
 
 </Project>

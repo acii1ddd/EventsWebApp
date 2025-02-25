@@ -42,4 +42,22 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         await _context.SaveChangesAsync();
         return _mapper.Map<RefreshTokenModel>(entity);
     }
+
+    public async Task<RefreshTokenModel?> GetByTokenAsync(string refreshToken)
+    {
+        return _mapper.Map<RefreshTokenModel>(
+            await _context.RefreshTokens
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Token == refreshToken)
+        );
+    }
+    
+    public async Task<RefreshTokenModel?> GetByUserIdAsync(Guid userId)
+    {
+        return _mapper.Map<RefreshTokenModel>(
+            await _context.RefreshTokens
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.UserId == userId)
+        );
+    }
 }

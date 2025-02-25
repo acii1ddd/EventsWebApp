@@ -16,7 +16,7 @@ public class EventController : ControllerBase
     private readonly IEventService _eventService;
     private readonly IMapper _mapper;
     
-    private readonly Guid _authorizedUserId = Guid.Parse("9d86f170-9372-4f8e-adc7-18b42bc7d09b");
+    // private readonly Guid _authorizedUserId = Guid.Parse("9d86f170-9372-4f8e-adc7-18b42bc7d09b");
     
     public EventController(IEventService eventService, IMapper mapper)
     {
