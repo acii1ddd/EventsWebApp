@@ -21,7 +21,7 @@ public class RefreshTokenEntity
     /// </summary>
     public Guid ParticipantId { get; set; }
 
-    public ParticipantEntity Participant { get; set; } = null!;
+    public UserEntity User { get; set; } = null!;
 }
 
 public class RefreshTokenEntityConfiguration : IEntityTypeConfiguration<RefreshTokenEntity>
@@ -39,7 +39,7 @@ public class RefreshTokenEntityConfiguration : IEntityTypeConfiguration<RefreshT
 
         builder.HasIndex(x => x.ParticipantId).IsUnique();
         
-        builder.HasOne(x => x.Participant)
+        builder.HasOne(x => x.User)
             .WithOne(x => x.RefreshToken)
             .HasForeignKey<RefreshTokenEntity>(x => x.ParticipantId);
     }

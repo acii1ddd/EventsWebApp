@@ -1,4 +1,6 @@
 using EventsApp.BLL.Services;
+using EventsApp.BLL.Services.Auth;
+using EventsApp.Domain.Abstractions.Auth;
 using EventsApp.Domain.Abstractions.Events;
 using EventsApp.Domain.Abstractions.Files;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,6 +13,8 @@ public static class ConfigurationExtensions
     {
         services.AddScoped<IEventService, EventService>();
         services.AddScoped<IFileStorageService, FileStorageService>();
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IPasswordHashService, PasswordHashService>();
         return services;
     }
 }

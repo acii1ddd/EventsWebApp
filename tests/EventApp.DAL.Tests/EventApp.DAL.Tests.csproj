@@ -22,6 +22,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\src\EventsApp.BLL\EventsApp.BLL.csproj" />
       <ProjectReference Include="..\..\src\EventsApp.DAL.Postgres\EventsApp.DAL.Postgres.csproj" />
     </ItemGroup>
 

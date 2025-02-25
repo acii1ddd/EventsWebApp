@@ -2,50 +2,51 @@ using AutoMapper;
 using EventsApp.DAL.Context;
 using EventsApp.Domain.Abstractions.Participants;
 using EventsApp.Domain.Models;
+using EventsApp.Domain.Models.Participants;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventsApp.DAL.Repositories;
 
-public class ParticipantRepository : IParticipantRepository
+public class UserRepository : IUserRepository
 {
     private readonly ApplicationDbContext _context;
     private readonly IMapper _mapper;
 
-    public ParticipantRepository(ApplicationDbContext context, IMapper mapper)
+    public UserRepository(ApplicationDbContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;
     }
 
-    public Task<PaginatedList<ParticipantModel>> GetAllAsync(int pageIndex, int pageSize)
+    public Task<PaginatedList<UserModel>> GetAllAsync(int pageIndex, int pageSize)
     {
         throw new NotImplementedException();
     }
 
-    public Task<ParticipantModel?> GetByIdAsync(Guid id)
+    public Task<UserModel?> GetByIdAsync(Guid id)
     {
         throw new NotImplementedException();
     }
 
-    public Task<ParticipantModel> AddAsync(ParticipantModel entity)
+    public Task<UserModel> AddAsync(UserModel entity)
     {
         throw new NotImplementedException();
     }
 
-    public Task<ParticipantModel?> UpdateAsync(ParticipantModel newEntity)
+    public Task<UserModel?> UpdateAsync(UserModel newEntity)
     {
         throw new NotImplementedException();
     }
 
-    public Task<ParticipantModel?> DeleteByIdAsync(Guid id)
+    public Task<UserModel?> DeleteByIdAsync(Guid id)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<ParticipantModel?> GetByEmailAsync(string email)
+    public async Task<UserModel?> GetByEmailAsync(string email)
     {
-        return _mapper.Map<ParticipantModel>(
-            await _context.Participants
+        return _mapper.Map<UserModel>(
+            await _context.Users
             .AsNoTracking()
             .FirstOrDefaultAsync(p => p.Email == email)
         );

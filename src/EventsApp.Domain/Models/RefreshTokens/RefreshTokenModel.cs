@@ -1,3 +1,5 @@
+using EventsApp.Domain.Models.Participants;
+
 namespace EventsApp.Domain.Models.RefreshTokens;
 
 public class RefreshTokenModel
@@ -18,5 +20,5 @@ public class RefreshTokenModel
     /// </summary>
     public Guid ParticipantId { get; set; }
 
-    public ParticipantModel Participant { get; set; } = null!;
+    public UserModel User { get; set; } = null!;
 }

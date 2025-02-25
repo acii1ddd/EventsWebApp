@@ -168,7 +168,7 @@ public class EventService : IEventService
         }
         
         await using var stream = imageFile.OpenReadStream();
-        var imageUrl = await _fileStorageService.UploadAsync(stream, imageFile.ContentType, 
+        var imageUrl = await _fileStorageService.UploadAsync(stream, imageFile.FileName, 
             imageFile.ContentType, eventId);
         
         _logger.LogInformation("Изображение успешно добавлено к событию {eventId}", eventId);

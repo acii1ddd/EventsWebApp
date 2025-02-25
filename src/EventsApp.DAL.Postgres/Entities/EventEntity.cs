@@ -30,7 +30,7 @@ public class EventEntity
     /// <summary>
     /// Участники события
     /// </summary>
-    public List<ParticipantEntity> Participants { get; set; } = [];
+    public List<UserEntity> Participants { get; set; } = [];
 }
 
 public class EventEntityConfiguration : IEntityTypeConfiguration<EventEntity>

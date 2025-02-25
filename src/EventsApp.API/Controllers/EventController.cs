@@ -4,6 +4,7 @@ using EventsApp.Domain.Abstractions.Events;
 using EventsApp.Domain.Errors;
 using EventsApp.Domain.Models.Events;
 using FluentResults;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventsApp.API.Controllers;
@@ -25,8 +26,11 @@ public class EventController : ControllerBase
 
     // /events?pageIndex=page-idex?pageSize=page-size
     [HttpGet]
+    [Authorize("Default, Admin")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<GetEventResponse>))]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetAllAsync([FromQuery] GetEventByPageRequest request)
     {
         // TODO: Валидация Fluent Validation на GetEventByPageRequest
@@ -38,8 +42,11 @@ public class EventController : ControllerBase
     
     // /events/guid
     [HttpGet("{eventId:guid}")]
+    [Authorize("Default, Admin")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<GetEventResponse>))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetByIdAsync([FromRoute] Guid eventId)
     {
         var eventModel = await _eventService.GetByIdAsync(eventId);
@@ -54,8 +61,11 @@ public class EventController : ControllerBase
 
     // /events/name
     [HttpGet("{name}")]
+    [Authorize("Default, Admin")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetEventResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetByNameAsync([FromRoute] string name)
     {
         var eventModel = await _eventService.GetByNameAsync(name);
@@ -70,8 +80,11 @@ public class EventController : ControllerBase
 
     // данные должны быть получены из тела запроса в формате multipart/form-data
     [HttpPost]
+    [Authorize("Admin")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetEventResponse))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(List<Error>))]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> AddAsync([FromForm] AddEventWithImageRequest request)
     {
         // TODO: Валидация FluentValidation
@@ -89,8 +102,11 @@ public class EventController : ControllerBase
 
     // events/guid
     [HttpPut("{eventId:guid}")]
+    [Authorize("Admin")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetEventResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> UpdateAsync([FromRoute] Guid eventId, 
         [FromForm] UpdateEventWithImageRequest request)
     {
@@ -109,8 +125,11 @@ public class EventController : ControllerBase
     }
 
     [HttpDelete("{eventId:guid}")]
+    [Authorize("Admin")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetEventResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> DeleteAsync([FromRoute] Guid eventId)
     {
         var deletedEventModel = await _eventService.DeleteAsync(eventId);
@@ -126,7 +145,10 @@ public class EventController : ControllerBase
 
     // events?Date=date&Location=location&Category=category
     [HttpGet("filter")]
+    [Authorize("Default, Admin")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetPaginatedListResponse<GetEventResponse>))]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetByFilter([FromQuery] GetEventByFilterRequest request)
     {
         // TODO: Валидация Fluent Validation для GetEventByFilterRequest
@@ -138,9 +160,12 @@ public class EventController : ControllerBase
     }
 
     [HttpPost("{eventId:guid}/add-image")]
+    [Authorize("Default, Admin")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AddImageResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(Error))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(Error))]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> AddImage([FromRoute] Guid eventId, [FromForm] AddImageRequest request)
     {
         var imageUrlResult = await _eventService.AddImageAsync(eventId, request.ImageFile);

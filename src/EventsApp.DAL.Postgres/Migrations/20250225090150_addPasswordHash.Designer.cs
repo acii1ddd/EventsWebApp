@@ -3,6 +3,7 @@ using System;
 using EventsApp.DAL.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EventsApp.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250225090150_addPasswordHash")]
+    partial class addPasswordHash
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,7 +25,7 @@ namespace EventsApp.DAL.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("EventEntityUserEntity", b =>
+            modelBuilder.Entity("EventEntityParticipantEntity", b =>
                 {
                     b.Property<Guid>("EventsId")
                         .HasColumnType("uuid");
@@ -34,7 +37,7 @@ namespace EventsApp.DAL.Migrations
 
                     b.HasIndex("ParticipantsId");
 
-                    b.ToTable("EventEntityUserEntity");
+                    b.ToTable("EventEntityParticipantEntity");
                 });
 
             modelBuilder.Entity("EventsApp.DAL.Entities.EventEntity", b =>
@@ -122,6 +125,46 @@ namespace EventsApp.DAL.Migrations
                     b.ToTable("ImageFiles", (string)null);
                 });
 
+            modelBuilder.Entity("EventsApp.DAL.Entities.ParticipantEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("BirthDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("EventRegistrationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Surname")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.ToTable("Participants", (string)null);
+                });
+
             modelBuilder.Entity("EventsApp.DAL.Entities.RefreshTokenEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -149,50 +192,7 @@ namespace EventsApp.DAL.Migrations
                     b.ToTable("RefreshTokens", (string)null);
                 });
 
-            modelBuilder.Entity("EventsApp.DAL.Entities.UserEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("BirthDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<DateTime>("EventRegistrationDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<int>("Role")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Surname")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Email")
-                        .IsUnique();
-
-                    b.ToTable("Users", (string)null);
-                });
-
-            modelBuilder.Entity("EventEntityUserEntity", b =>
+            modelBuilder.Entity("EventEntityParticipantEntity", b =>
                 {
                     b.HasOne("EventsApp.DAL.Entities.EventEntity", null)
                         .WithMany()
@@ -200,7 +200,7 @@ namespace EventsApp.DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("EventsApp.DAL.Entities.UserEntity", null)
+                    b.HasOne("EventsApp.DAL.Entities.ParticipantEntity", null)
                         .WithMany()
                         .HasForeignKey("ParticipantsId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -220,13 +220,13 @@ namespace EventsApp.DAL.Migrations
 
             modelBuilder.Entity("EventsApp.DAL.Entities.RefreshTokenEntity", b =>
                 {
-                    b.HasOne("EventsApp.DAL.Entities.UserEntity", "User")
+                    b.HasOne("EventsApp.DAL.Entities.ParticipantEntity", "Participant")
                         .WithOne("RefreshToken")
                         .HasForeignKey("EventsApp.DAL.Entities.RefreshTokenEntity", "ParticipantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("Participant");
                 });
 
             modelBuilder.Entity("EventsApp.DAL.Entities.EventEntity", b =>
@@ -235,7 +235,7 @@ namespace EventsApp.DAL.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("EventsApp.DAL.Entities.UserEntity", b =>
+            modelBuilder.Entity("EventsApp.DAL.Entities.ParticipantEntity", b =>
                 {
                     b.Navigation("RefreshToken")
                         .IsRequired();
