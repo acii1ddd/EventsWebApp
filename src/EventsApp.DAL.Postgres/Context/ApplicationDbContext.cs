@@ -12,7 +12,9 @@ public class ApplicationDbContext : DbContext
     
     public DbSet<EventEntity> Events { get; set; }
     
-    public DbSet<ParticipantEntity> Participants { get; set; }
+    public DbSet<UserEntity> Users { get; set; }
+
+    public DbSet<EventUserEntity> EventUsers { get; set; }
     
     public DbSet<RefreshTokenEntity> RefreshTokens { get; set; }
     

@@ -1,4 +1,5 @@
-﻿using EventsApp.Domain.Models.Images;
+﻿using EventsApp.Domain.Models.EventUsers;
+using EventsApp.Domain.Models.Images;
 
 namespace EventsApp.Domain.Models.Events;
 
@@ -21,4 +22,6 @@ public class EventModel
     public string ImageUrl { get; set; } = string.Empty;
     
     public ImageFileModel ImageFile { get; set; } = null!;
+    
+    public List<EventUserModel> EventUsers { get; set; } = [];
 }

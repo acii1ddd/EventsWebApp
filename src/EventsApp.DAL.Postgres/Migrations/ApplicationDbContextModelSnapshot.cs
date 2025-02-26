@@ -22,21 +22,6 @@ namespace EventsApp.DAL.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("EventEntityParticipantEntity", b =>
-                {
-                    b.Property<Guid>("EventsId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ParticipantsId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("EventsId", "ParticipantsId");
-
-                    b.HasIndex("ParticipantsId");
-
-                    b.ToTable("EventEntityParticipantEntity");
-                });
-
             modelBuilder.Entity("EventsApp.DAL.Entities.EventEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -74,7 +59,27 @@ namespace EventsApp.DAL.Migrations
                     b.ToTable("Events", (string)null);
                 });
 
-            modelBuilder.Entity("EventsApp.DAL.Entities.ImageFile", b =>
+            modelBuilder.Entity("EventsApp.DAL.Entities.EventUserEntity", b =>
+                {
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("RegisteredAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("current_timestamp");
+
+                    b.HasKey("EventId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("EventUsers", (string)null);
+                });
+
+            modelBuilder.Entity("EventsApp.DAL.Entities.ImageFileEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -122,7 +127,34 @@ namespace EventsApp.DAL.Migrations
                     b.ToTable("ImageFiles", (string)null);
                 });
 
-            modelBuilder.Entity("EventsApp.DAL.Entities.ParticipantEntity", b =>
+            modelBuilder.Entity("EventsApp.DAL.Entities.RefreshTokenEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("RefreshTokens", (string)null);
+                });
+
+            modelBuilder.Entity("EventsApp.DAL.Entities.UserEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -136,13 +168,18 @@ namespace EventsApp.DAL.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<DateTime>("EventRegistrationDate")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Surname")
                         .IsRequired()
@@ -154,56 +191,33 @@ namespace EventsApp.DAL.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Participants", (string)null);
+                    b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("EventsApp.DAL.Entities.RefreshTokenEntity", b =>
+            modelBuilder.Entity("EventsApp.DAL.Entities.EventUserEntity", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("ExpiryDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("ParticipantId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Token")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ParticipantId")
-                        .IsUnique();
-
-                    b.ToTable("RefreshTokens", (string)null);
-                });
-
-            modelBuilder.Entity("EventEntityParticipantEntity", b =>
-                {
-                    b.HasOne("EventsApp.DAL.Entities.EventEntity", null)
-                        .WithMany()
-                        .HasForeignKey("EventsId")
+                    b.HasOne("EventsApp.DAL.Entities.EventEntity", "Event")
+                        .WithMany("EventUsers")
+                        .HasForeignKey("EventId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("EventsApp.DAL.Entities.ParticipantEntity", null)
-                        .WithMany()
-                        .HasForeignKey("ParticipantsId")
+                    b.HasOne("EventsApp.DAL.Entities.UserEntity", "User")
+                        .WithMany("EventUsers")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Event");
+
+                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("EventsApp.DAL.Entities.ImageFile", b =>
+            modelBuilder.Entity("EventsApp.DAL.Entities.ImageFileEntity", b =>
                 {
                     b.HasOne("EventsApp.DAL.Entities.EventEntity", "Event")
                         .WithOne("ImageFile")
-                        .HasForeignKey("EventsApp.DAL.Entities.ImageFile", "EventId")
+                        .HasForeignKey("EventsApp.DAL.Entities.ImageFileEntity", "EventId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -212,23 +226,27 @@ namespace EventsApp.DAL.Migrations
 
             modelBuilder.Entity("EventsApp.DAL.Entities.RefreshTokenEntity", b =>
                 {
-                    b.HasOne("EventsApp.DAL.Entities.ParticipantEntity", "Participant")
+                    b.HasOne("EventsApp.DAL.Entities.UserEntity", "User")
                         .WithOne("RefreshToken")
-                        .HasForeignKey("EventsApp.DAL.Entities.RefreshTokenEntity", "ParticipantId")
+                        .HasForeignKey("EventsApp.DAL.Entities.RefreshTokenEntity", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Participant");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("EventsApp.DAL.Entities.EventEntity", b =>
                 {
+                    b.Navigation("EventUsers");
+
                     b.Navigation("ImageFile")
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("EventsApp.DAL.Entities.ParticipantEntity", b =>
+            modelBuilder.Entity("EventsApp.DAL.Entities.UserEntity", b =>
                 {
+                    b.Navigation("EventUsers");
+
                     b.Navigation("RefreshToken")
                         .IsRequired();
                 });

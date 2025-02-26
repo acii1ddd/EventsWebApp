@@ -1,21 +1,21 @@
 using AutoMapper;
 using EventsApp.API.Contracts.Events;
-using EventsApp.API.Errors;
+using EventsApp.API.Contracts.Users;
 using EventsApp.Domain.Abstractions.Events;
+using EventsApp.Domain.Errors;
 using EventsApp.Domain.Models.Events;
 using FluentResults;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventsApp.API.Controllers;
 
 [Route("api/events")]
 [ApiController]
-public class EventController : ControllerBase
+public class EventController : BaseController
 {
     private readonly IEventService _eventService;
     private readonly IMapper _mapper;
-    
-    private readonly Guid _authorizedUserId = Guid.Parse("9d86f170-9372-4f8e-adc7-18b42bc7d09b");
     
     public EventController(IEventService eventService, IMapper mapper)
     {
@@ -25,21 +25,26 @@ public class EventController : ControllerBase
 
     // /events?pageIndex=page-idex?pageSize=page-size
     [HttpGet]
+    [Authorize("Default, Admin")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<GetEventResponse>))]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetAllAsync([FromQuery] GetEventByPageRequest request)
     {
         // TODO: Валидация Fluent Validation на GetEventByPageRequest
         var events = await _eventService.GetAllAsync(request.PageIndex, request.PageSize);
-        
         var result = _mapper.Map<GetPaginatedListResponse<GetEventResponse>>(events);
         return Ok(result);
     }
     
     // /events/guid
     [HttpGet("{eventId:guid}")]
+    [Authorize("Default, Admin")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<GetEventResponse>))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetByIdAsync([FromRoute] Guid eventId)
     {
         var eventModel = await _eventService.GetByIdAsync(eventId);
@@ -54,8 +59,11 @@ public class EventController : ControllerBase
 
     // /events/name
     [HttpGet("{name}")]
+    [Authorize("Default, Admin")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetEventResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetByNameAsync([FromRoute] string name)
     {
         var eventModel = await _eventService.GetByNameAsync(name);
@@ -70,8 +78,11 @@ public class EventController : ControllerBase
 
     // данные должны быть получены из тела запроса в формате multipart/form-data
     [HttpPost]
+    [Authorize("Admin")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetEventResponse))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(List<Error>))]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> AddAsync([FromForm] AddEventWithImageRequest request)
     {
         // TODO: Валидация FluentValidation
@@ -89,8 +100,11 @@ public class EventController : ControllerBase
 
     // events/guid
     [HttpPut("{eventId:guid}")]
+    [Authorize("Admin")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetEventResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> UpdateAsync([FromRoute] Guid eventId, 
         [FromForm] UpdateEventWithImageRequest request)
     {
@@ -109,8 +123,11 @@ public class EventController : ControllerBase
     }
 
     [HttpDelete("{eventId:guid}")]
+    [Authorize("Admin")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetEventResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> DeleteAsync([FromRoute] Guid eventId)
     {
         var deletedEventModel = await _eventService.DeleteAsync(eventId);
@@ -126,7 +143,10 @@ public class EventController : ControllerBase
 
     // events?Date=date&Location=location&Category=category
     [HttpGet("filter")]
+    [Authorize("Default, Admin")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetPaginatedListResponse<GetEventResponse>))]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetByFilter([FromQuery] GetEventByFilterRequest request)
     {
         // TODO: Валидация Fluent Validation для GetEventByFilterRequest
@@ -138,9 +158,12 @@ public class EventController : ControllerBase
     }
 
     [HttpPost("{eventId:guid}/add-image")]
+    [Authorize("Default, Admin")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AddImageResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(Error))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(Error))]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> AddImage([FromRoute] Guid eventId, [FromForm] AddImageRequest request)
     {
         var imageUrlResult = await _eventService.AddImageAsync(eventId, request.ImageFile);
@@ -156,6 +179,87 @@ public class EventController : ControllerBase
         }
         
         var error = imageUrlResult.Errors.First();
-        return error is NotFoundError ? NotFound(error) : BadRequest(error);
+        return error is EventWithIdNotFoundError ? NotFound(error) : BadRequest(error);
+    }
+    
+    [HttpPost("events/{eventId:guid}/register")]
+    [Authorize("Default, Admin")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(Error))]
+    public async Task<IActionResult> RegisterToEventAsync([FromRoute] Guid eventId)
+    {
+        var registerResult = await _eventService.RegisterToEventAsync(eventId, AuthorizedUserId);
+        if (registerResult.IsFailed)
+        {
+            var error = registerResult.Errors.First();
+            if (error is UserWithIdNotFoundError or UserWithEmailNotFoundError)
+                return NotFound(error);
+        }
+
+        if (registerResult.Value)
+        {
+            return Ok();
+        }
+        return BadRequest("Пользователь уже зарегистрирован на это событие");
+    }
+
+    [HttpGet("{eventId:guid}/participants")]
+    [Authorize("Default, Admin")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetEventParticipantsResponse))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetEventParticipantsAsync([FromRoute] Guid eventId)
+    {
+        var participants = await _eventService.GetParticipantsByIdAsync(eventId);
+
+        if (participants is null) 
+            return NotFound();
+
+        var result = _mapper.Map<GetEventParticipantsResponse>(participants);
+        return Ok(result);
+    }
+    
+    [HttpGet("{eventId:guid}/participants/{userId:guid}")]
+    [Authorize("Default, Admin")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetEventParticipantsResponse))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetEventParticipantByIdAsync([FromRoute] Guid eventId, 
+        [FromRoute] Guid userId)
+    {
+        var participantResult = await _eventService.GetParticipantByIdAsync(eventId, userId);
+
+        if (participantResult.IsFailed)
+        {
+            var error = participantResult.Errors.First();
+            if (error is UserWithIdNotFoundError or UserWithEmailNotFoundError)
+                return NotFound(error);
+
+            BadRequest(error);
+        }
+
+        var result = _mapper.Map<GetUserResponse>(participantResult.Value);
+        return Ok(result);
+    }
+    
+    // Отмена участия в событии текущего пользователя
+    
+    [HttpDelete("{eventId:guid}/participation")]
+    [Authorize("Default, Admin")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetEventParticipantsResponse))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CancelEventParticipationAsync([FromRoute] Guid eventId)
+    {
+        var participantResult = await _eventService.CancelEventParticipationAsync(eventId, AuthorizedUserId);
+
+        if (participantResult.IsFailed)
+        {
+            var error = participantResult.Errors.First();
+            if (error is UserWithIdNotFoundError or UserWithEmailNotFoundError)
+                return NotFound(error);
+
+            BadRequest(error);
+        }
+        
+        return Ok();
     }
 }

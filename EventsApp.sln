@@ -18,6 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{BB490934
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventApp.DAL.Tests", "tests\EventApp.DAL.Tests\EventApp.DAL.Tests.csproj", "{CA117104-41FB-49C3-B4F9-1C0CF0F005D2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventsApp.Configuration", "src\EventsApp.Configuration\EventsApp.Configuration.csproj", "{DC0CC8E6-113C-4C4D-A659-B90BFE289BBD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,10 @@ Global
 		{CA117104-41FB-49C3-B4F9-1C0CF0F005D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CA117104-41FB-49C3-B4F9-1C0CF0F005D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CA117104-41FB-49C3-B4F9-1C0CF0F005D2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC0CC8E6-113C-4C4D-A659-B90BFE289BBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC0CC8E6-113C-4C4D-A659-B90BFE289BBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC0CC8E6-113C-4C4D-A659-B90BFE289BBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC0CC8E6-113C-4C4D-A659-B90BFE289BBD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{CA117104-41FB-49C3-B4F9-1C0CF0F005D2} = {BB490934-2D91-4BF0-A6F9-CEA7AD00CFCA}

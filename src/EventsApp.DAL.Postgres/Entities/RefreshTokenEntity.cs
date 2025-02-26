@@ -19,9 +19,9 @@ public class RefreshTokenEntity
     /// <summary>
     /// Владелец токена
     /// </summary>
-    public Guid ParticipantId { get; set; }
+    public Guid UserId { get; set; }
 
-    public ParticipantEntity Participant { get; set; } = null!;
+    public UserEntity User { get; set; } = null!;
 }
 
 public class RefreshTokenEntityConfiguration : IEntityTypeConfiguration<RefreshTokenEntity>
@@ -37,10 +37,10 @@ public class RefreshTokenEntityConfiguration : IEntityTypeConfiguration<RefreshT
         builder.Property(x => x.ExpiryDate).IsRequired();
         builder.Property(x => x.CreatedDate).IsRequired();
 
-        builder.HasIndex(x => x.ParticipantId).IsUnique();
+        builder.HasIndex(x => x.UserId).IsUnique();
         
-        builder.HasOne(x => x.Participant)
+        builder.HasOne(x => x.User)
             .WithOne(x => x.RefreshToken)
-            .HasForeignKey<RefreshTokenEntity>(x => x.ParticipantId);
+            .HasForeignKey<RefreshTokenEntity>(x => x.UserId);
     }
 }
