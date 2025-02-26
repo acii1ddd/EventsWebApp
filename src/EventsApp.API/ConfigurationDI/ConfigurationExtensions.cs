@@ -1,3 +1,7 @@
+using EventsApp.API.Contracts.Validators;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+
 namespace EventsApp.API.ConfigurationDI;
 
 public static class ConfigurationExtensions
@@ -8,6 +12,10 @@ public static class ConfigurationExtensions
         {
             config.AddMaps(typeof(ConfigurationExtensions).Assembly);
         });
+        
+        services.AddValidatorsFromAssemblyContaining<GetEventByPageRequestValidator>();
+        services.AddFluentValidationAutoValidation();
+        services.AddFluentValidationClientsideAdapters();
         return services;
     }
 }

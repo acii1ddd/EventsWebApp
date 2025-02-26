@@ -22,15 +22,17 @@ public class EventEntity
     /// <summary>
     /// Изображение события
     /// </summary>
-    public ImageFileEntity ImageFileEntity { get; set; } = null!;
-    
-    // Не используется в связях
-    //public Guid ImageId { get; set; }
+    public ImageFileEntity ImageFile { get; set; } = null!;
     
     /// <summary>
     /// Участники события
     /// </summary>
-    public List<ParticipantEntity> Participants { get; set; } = [];
+    // public List<UserEntity> Users { get; set; } = [];
+    
+    /// <summary>
+    /// Связующая таблица с юзерами
+    /// </summary>
+    public List<EventUserEntity> EventUsers { get; set; } = [];
 }
 
 public class EventEntityConfiguration : IEntityTypeConfiguration<EventEntity>
@@ -64,12 +66,17 @@ public class EventEntityConfiguration : IEntityTypeConfiguration<EventEntity>
         builder.Property(x => x.MaxParticipants).IsRequired();
 
         // связь с таблицей участников
-        builder.HasMany(x => x.Participants)
-            .WithMany(x => x.Events);
+        // builder.HasMany(x => x.Users)
+        //     .WithMany(x => x.Events);
         
         // связь с таблицей картинок
-        builder.HasOne(x => x.ImageFileEntity)
+        builder.HasOne(x => x.ImageFile)
             .WithOne(x => x.Event)
             .HasForeignKey<ImageFileEntity>(x => x.EventId);
+        
+        // связь со связующей таблицей с юзерами
+        builder.HasMany(x => x.EventUsers)
+            .WithOne(x => x.Event)
+            .HasForeignKey(x => x.EventId);
     }
 }

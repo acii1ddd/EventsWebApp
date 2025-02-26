@@ -2,7 +2,7 @@ using AutoMapper;
 using EventsApp.DAL.Context;
 using EventsApp.DAL.Entities;
 using EventsApp.Domain.Abstractions.Files;
-using EventsApp.Domain.Models;
+using EventsApp.Domain.Models.Images;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventsApp.DAL.Repositories;
@@ -65,7 +65,8 @@ public class FileStorageRepository : IFileStorageRepository
             return null;
         }
         
-        _context.ImageFiles.Update(image);
+        var imageEntity = _mapper.Map<ImageFileEntity>(imageFile);
+        _context.ImageFiles.Update(imageEntity);
         await _context.SaveChangesAsync();
         return _mapper.Map<ImageFileModel>(image);
     }

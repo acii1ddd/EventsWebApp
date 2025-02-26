@@ -1,4 +1,7 @@
-﻿namespace EventsApp.Domain.Models.Events;
+﻿using EventsApp.Domain.Models.EventUsers;
+using EventsApp.Domain.Models.Images;
+
+namespace EventsApp.Domain.Models.Events;
 
 public class EventModel
 {
@@ -16,8 +19,9 @@ public class EventModel
     
     public int MaxParticipants { get; set; }
     
-    /// <summary>
-    /// Изображение события
-    /// </summary>
     public string ImageUrl { get; set; } = string.Empty;
+    
+    public ImageFileModel ImageFile { get; set; } = null!;
+    
+    public List<EventUserModel> EventUsers { get; set; } = [];
 }

@@ -1,6 +1,6 @@
 using EventsApp.Domain.Models.Events;
 
-namespace EventsApp.Domain.Models;
+namespace EventsApp.Domain.Models.Images;
 
 public class ImageFileModel
 {
