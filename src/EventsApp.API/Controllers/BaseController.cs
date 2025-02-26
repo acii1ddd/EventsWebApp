@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EventsApp.API.Controllers;
 
+[ApiController]
+[Route("api/[controller]")]
 public class BaseController : ControllerBase
 {
     protected Guid AuthorizedUserId

@@ -9,8 +9,9 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/EventsApp.API/EventsApp.API.csproj", "src/EventsApp.API/"]
 COPY ["src/EventsApp.BLL/EventsApp.BLL.csproj", "src/EventsApp.BLL/"]
-COPY ["src/EventsApp.DAL/EventsApp.DAL.csproj", "src/EventsApp.DAL/"]
+COPY ["src/EventsApp.DAL.Postgres/EventsApp.DAL.Postgres.csproj", "src/EventsApp.DAL.Postgres/"]
 COPY ["src/EventsApp.Domain/EventsApp.Domain.csproj", "src/EventsApp.Domain/"]
+COPY ["src/EventsApp.Configuration/EventsApp.Configuration.csproj", "src/EventsApp.Configuration/"]
 RUN dotnet restore "src/EventsApp.API/EventsApp.API.csproj"
 COPY . .
 WORKDIR "/src/src/EventsApp.API"

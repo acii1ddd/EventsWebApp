@@ -8,8 +8,15 @@ services:
       dockerfile: src/EventsApp.API/Dockerfile
     depends_on:
       - postgres
+      - minio
     networks:
       - eventsApp
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    ports:
+      - "49395:80"
+#      - "49394:443"
     
   postgres:
     container_name: postgres

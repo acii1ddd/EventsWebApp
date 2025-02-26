@@ -10,8 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EventsApp.API.Controllers;
 
-[Route("api/events")]
 [ApiController]
+[Route("api/events")]
 public class EventController : BaseController
 {
     private readonly IEventService _eventService;
@@ -32,7 +32,6 @@ public class EventController : BaseController
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetAllAsync([FromQuery] GetEventByPageRequest request)
     {
-        // TODO: Валидация Fluent Validation на GetEventByPageRequest
         var events = await _eventService.GetAllAsync(request.PageIndex, request.PageSize);
         var result = _mapper.Map<GetPaginatedListResponse<GetEventResponse>>(events);
         return Ok(result);
@@ -85,7 +84,6 @@ public class EventController : BaseController
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> AddAsync([FromForm] AddEventWithImageRequest request)
     {
-        // TODO: Валидация FluentValidation
         var eventModel = _mapper.Map<EventModel>(request);
         
         var addedEventModel = await _eventService.AddAsync(eventModel, request.ImageFile);
@@ -108,7 +106,6 @@ public class EventController : BaseController
     public async Task<IActionResult> UpdateAsync([FromRoute] Guid eventId, 
         [FromForm] UpdateEventWithImageRequest request)
     {
-        // TODO: Валидация FluentValidation для UpdateEventWithImageRequest.EventData
         var eventModel = _mapper.Map<EventModel>(request);
         eventModel.Id = eventId;
         
@@ -242,7 +239,6 @@ public class EventController : BaseController
     }
     
     // Отмена участия в событии текущего пользователя
-    
     [HttpDelete("{eventId:guid}/participation")]
     [Authorize("Default, Admin")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetEventParticipantsResponse))]
