@@ -14,16 +14,16 @@ Start-up instructions:
 6. Next, build the solution:
     dotnet build
 
-8. Go to docker directory
+8. Go to docker directory:
    cd docker
 
 9. Start up the application stack:
     docker compose up -d
 
-10. Go to API
+10. Go to API:
    cd ../src/EventsApp.API
 
-11. Launch App
+11. Launch App:
     dotnet run --launch-profile "https"
 
 12. Go to https://localhost:7242/swagger/index.html
