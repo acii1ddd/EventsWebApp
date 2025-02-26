@@ -27,3 +27,6 @@ Start-up instructions:
     dotnet run --launch-profile "https"
 
 12. Go to https://localhost:7242/swagger/index.html
+
+User Account:     email: user.com, password: TestPassword
+Admin Account:    email: admin.com, password: TestPassword
