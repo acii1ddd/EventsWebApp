@@ -4,6 +4,7 @@ using Amazon.Runtime;
 using Amazon.S3;
 using EventsApp.API.ConfigurationDI;
 using EventsApp.API.Extension;
+using EventsApp.API.Middleware;
 using EventsApp.BLL.ConfigurationDI;
 using EventsApp.Configuration;
 using EventsApp.DAL;
@@ -128,6 +129,8 @@ public class Program
         });
         
         var app = builder.Build();
+
+        app.UseMiddleware<GlobalExceptionMiddleware>();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())

@@ -36,4 +36,22 @@ public class EventUserRepository : IEventUserRepository
         await _context.SaveChangesAsync();
         return _mapper.Map<EventUserModel>(entity);
     }
+
+    public async Task<EventUserModel?> DeleteByEventAndUserIdAsync(Guid eventId, Guid userId)
+    {
+        var entity = await _context.EventUsers
+            .AsNoTracking()
+            .Include(x => x.User)
+            .Include(x => x.Event)
+            .FirstOrDefaultAsync(x => x.EventId == eventId && x.UserId == userId);
+
+        if (entity == null)
+        {
+            return null;
+        }
+        
+        _context.EventUsers.Remove(entity);
+        await _context.SaveChangesAsync();
+        return _mapper.Map<EventUserModel>(entity);
+    }
 }

@@ -1,7 +1,6 @@
 using AutoMapper;
 using EventsApp.DAL.Context;
 using EventsApp.Domain.Abstractions.Users;
-using EventsApp.Domain.Models;
 using EventsApp.Domain.Models.Participants;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,11 +17,6 @@ public class UserRepository : IUserRepository
         _mapper = mapper;
     }
 
-    public Task<PaginatedList<UserModel>> GetAllAsync(int pageIndex, int pageSize)
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task<UserModel?> GetByIdAsync(Guid id)
     {
         return _mapper.Map<UserModel>(
@@ -31,22 +25,7 @@ public class UserRepository : IUserRepository
                 .FirstOrDefaultAsync(x => x.Id == id)
         );
     }
-
-    public Task<UserModel> AddAsync(UserModel entity)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<UserModel?> UpdateAsync(UserModel newEntity)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<UserModel?> DeleteByIdAsync(Guid id)
-    {
-        throw new NotImplementedException();
-    }
-
+    
     public async Task<UserModel?> GetByEmailAsync(string email)
     {
         return _mapper.Map<UserModel>(

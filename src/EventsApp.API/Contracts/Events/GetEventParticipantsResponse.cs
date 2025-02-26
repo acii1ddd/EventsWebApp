@@ -1,11 +1,12 @@
 using AutoMapper;
+using EventsApp.API.Contracts.Users;
 using EventsApp.Domain.Models.Participants;
 
 namespace EventsApp.API.Contracts.Events;
 
 public class GetEventParticipantsResponse
 {
-    public List<UserModel> Participants { get; init; } = [];
+    public List<GetUserResponse> Participants { get; init; } = [];
 }
 
 public class GetEventParticipantsResponseProfile : Profile

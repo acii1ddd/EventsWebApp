@@ -5,6 +5,7 @@ using EventsApp.Domain.Abstractions.Users;
 using EventsApp.Domain.Errors;
 using EventsApp.Domain.Models;
 using EventsApp.Domain.Models.Events;
+using EventsApp.Domain.Models.EventUsers;
 using EventsApp.Domain.Models.Participants;
 using FluentResults;
 using Microsoft.AspNetCore.Http;
@@ -16,16 +17,22 @@ public class EventService : IEventService
 {
     private readonly IEventRepository _eventRepository;
     private readonly IFileStorageService _fileStorageService;
-    private readonly IEventUserRepository _eventuserRepository;
+    private readonly IEventUserRepository _eventUserRepository;
+    private readonly IUserRepository _userRepository;
     private readonly ILogger<EventService> _logger;
     
-    public EventService(IEventRepository eventRepository, IFileStorageService fileService, 
-        ILogger<EventService> logger, IEventUserRepository eventuserRepository)
+    public EventService(
+        IEventRepository eventRepository, 
+        IFileStorageService fileService, 
+        ILogger<EventService> logger, 
+        IUserRepository userRepository, 
+        IEventUserRepository eventUserRepository)
     {
         _eventRepository = eventRepository;
         _fileStorageService = fileService;
         _logger = logger;
-        _eventuserRepository = eventuserRepository;
+        _userRepository = userRepository;
+        _eventUserRepository = eventUserRepository;
     }
 
     public async Task<PaginatedList<EventModel>> GetAllAsync(int pageIndex, int pageSize)
@@ -179,15 +186,83 @@ public class EventService : IEventService
         _logger.LogInformation("Изображение успешно добавлено к событию {eventId}", eventId);
         return imageUrl;
     }
+    
+    public async Task<Result<bool>> RegisterToEventAsync(Guid eventId, Guid userId)
+    {
+        var isRegistered = await ValidateEventAndUserAsync(eventId, userId);
+        
+        if (isRegistered.IsFailed)
+        {
+            return Result.Fail(isRegistered.Errors.First());
+        }
+        
+        // пользователь уже подписан на это событие
+        if (isRegistered.Value != null) return false;
+
+        // подписываем пользователя на событие
+        var eventUserModel = new EventUserModel
+        {
+            EventId = eventId,
+            UserId = userId,
+            RegisteredAt = DateTime.UtcNow
+        };
+        _ = await _eventUserRepository.AddAsync(eventUserModel);
+        return true;
+    }
 
     public async Task<List<UserModel>?> GetParticipantsByIdAsync(Guid eventId)
     {
         var eventModel = await _eventRepository.GetByIdAsync(eventId);
         if (eventModel is null) return null;
 
-        var participants = eventModel.EventUsers.
-            Select(eventUser => eventUser.User)
+        var participants = eventModel.EventUsers
+            .Select(eventUser => eventUser.User)
             .ToList();
         return participants;
+    }
+
+    public async Task<Result<UserModel>> GetParticipantByIdAsync(Guid eventId, Guid userId)
+    {
+        var eventUserResult = await ValidateEventAndUserAsync(eventId, userId);
+        if (eventUserResult.IsFailed) 
+        {
+            return Result.Fail(eventUserResult.Errors.First());
+        }
+        
+        if (eventUserResult.Value == null)
+            return Result.Fail(new Error($"Пользователь {userId} не был зарегистрирован на событие {eventId}"));
+
+        return eventUserResult.Value.User;
+    }
+
+    public async Task<Result<bool>> CancelEventParticipationAsync(Guid eventId, Guid userId)
+    {
+        var eventUserResult = await ValidateEventAndUserAsync(eventId, userId);
+        
+        if (eventUserResult.IsFailed) 
+        {
+            return Result.Fail(eventUserResult.Errors.First());
+        }
+        
+        if (eventUserResult.Value == null)
+            return Result.Fail(new Error($"Пользователь {userId} не был зарегистрирован на событие {eventId}"));
+
+        // удаляем подписку пользователя на событие
+        _ = await _eventUserRepository.DeleteByEventAndUserIdAsync(eventId, userId);
+        return true;
+    }
+    
+    private async Task<Result<EventUserModel?>> ValidateEventAndUserAsync(Guid eventId, Guid userId)
+    {
+        var eventModel = await _eventRepository.GetByIdAsync(eventId);
+        if (eventModel is null)
+            return Result.Fail(new EventWithIdNotFoundError(eventId));
+        
+        var userModel = await _userRepository.GetByIdAsync(userId);
+        if (userModel == null)
+            return Result.Fail(new UserWithIdNotFoundError(userId));
+        
+        var registeredEventUser = await _eventUserRepository.GetByEventAndUserIdAsync(eventId, userId);
+        return registeredEventUser;
     }
 }

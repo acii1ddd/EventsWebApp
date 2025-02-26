@@ -16,7 +16,6 @@ public static class ConfigurationExtensions
         services.AddScoped<IFileStorageService, FileStorageService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IPasswordHashService, PasswordHashService>();
-        services.AddScoped<IUserService, UserService>();
         return services;
     }
 }

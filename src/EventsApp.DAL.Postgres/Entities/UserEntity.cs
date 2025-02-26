@@ -24,7 +24,7 @@ public class UserEntity
     /// События этого участника
     /// </summary>
     // public List<EventEntity> Events { get; set; } = [];
-    //
+    
     /// <summary>
     /// Refresh token участника
     /// </summary>

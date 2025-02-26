@@ -24,7 +24,7 @@ public class FileStorageService : IFileStorageService
 
     private static string GetPath(string bucketName, string key)
     { 
-        return $"{BucketName}/{key}";
+        return $"{bucketName}/{key}";
     }
     
     public async Task<string> UploadAsync(Stream fileStream, string fileName, string mimeType, Guid eventId)

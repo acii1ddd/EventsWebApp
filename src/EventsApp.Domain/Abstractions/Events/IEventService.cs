@@ -30,6 +30,18 @@ public interface IEventService
         string? category, int pageIndex, int pageSize);
 
     public Task<Result<string>> AddImageAsync(Guid eventId, IFormFile imageFile);
+
+    public Task<Result<bool>> RegisterToEventAsync(Guid eventId, Guid userId);
     
     public Task<List<UserModel>?> GetParticipantsByIdAsync(Guid eventId);
+
+    /// <summary>
+    /// Получение пользователя события eventId по Id userId 
+    /// </summary>
+    /// <param name="eventId"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    public Task<Result<UserModel>> GetParticipantByIdAsync(Guid eventId, Guid userId);
+
+    public Task<Result<bool>> CancelEventParticipationAsync(Guid eventId, Guid authorizedUserId);
 }
