@@ -22,7 +22,6 @@ public static class DbInitializer
                 Name = "admin",
                 Surname = "TestSurname",
                 BirthDate = DateTime.Parse("03-05-2005").ToUniversalTime(),
-                EventRegistrationDate = DateTime.UtcNow,
                 Email = "admin.com",
                 PasswordHash = testHash,
                 Role = UserRole.Admin
@@ -34,7 +33,6 @@ public static class DbInitializer
                 Name = "user",
                 Surname = "TestSurname",
                 BirthDate = DateTime.Parse("03-05-2005").ToUniversalTime(),
-                EventRegistrationDate = DateTime.UtcNow,
                 Email = "user.com",
                 PasswordHash = testHash,
                 Role = UserRole.Default

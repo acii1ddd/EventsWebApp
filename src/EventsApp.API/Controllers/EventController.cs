@@ -1,8 +1,10 @@
 using AutoMapper;
 using EventsApp.API.Contracts.Events;
 using EventsApp.Domain.Abstractions.Events;
+using EventsApp.Domain.Abstractions.Users;
 using EventsApp.Domain.Errors;
 using EventsApp.Domain.Models.Events;
+using EventsApp.Domain.Models.Participants;
 using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,17 +13,19 @@ namespace EventsApp.API.Controllers;
 
 [Route("api/events")]
 [ApiController]
-public class EventController : ControllerBase
+public class EventController : BaseController
 {
     private readonly IEventService _eventService;
+    private readonly IUserService _userService;
     private readonly IMapper _mapper;
     
     // private readonly Guid _authorizedUserId = Guid.Parse("9d86f170-9372-4f8e-adc7-18b42bc7d09b");
     
-    public EventController(IEventService eventService, IMapper mapper)
+    public EventController(IEventService eventService, IMapper mapper, IUserService userService)
     {
         _eventService = eventService;
         _mapper = mapper;
+        _userService = userService;
     }
 
     // /events?pageIndex=page-idex?pageSize=page-size
@@ -183,4 +187,44 @@ public class EventController : ControllerBase
         var error = imageUrlResult.Errors.First();
         return error is EventWithIdNotFoundError ? NotFound(error) : BadRequest(error);
     }
+    
+    [HttpPost("events/{eventId:guid}/register")]
+    [Authorize("Default, Admin")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(Error))]
+    public async Task<IActionResult> RegisterToEventAsync([FromRoute] Guid eventId)
+    {
+        var registerResult = await _userService.RegisterToEventAsync(eventId, AuthorizedUserId);
+        if (registerResult.IsFailed)
+        {
+            var error = registerResult.Errors.First();
+            if (error is UserWithIdNotFoundError or UserWithEmailNotFoundError)
+                return NotFound(error);
+        }
+
+        if (registerResult.Value)
+        {
+            return Ok();
+        }
+        return BadRequest("Пользователь уже зарегистрирован на это событие");
+    }
+
+    [HttpGet("{eventId:guid}/participants")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetEventParticipantsResponse))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetEventParticipantsAsync([FromRoute] Guid eventId)
+    {
+        var participants = await _eventService.GetParticipantsByIdAsync(eventId);
+
+        if (participants is null) 
+            return BadRequest();
+
+        var result = _mapper.Map<GetEventParticipantsResponse>(participants);
+        return Ok(result);
+    }
+    
+    // TODO:  Получение определенного участника по его Id;
+    
+    // TODO: Отмена участия пользователя в событии; 
 }

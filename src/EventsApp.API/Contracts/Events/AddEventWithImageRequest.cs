@@ -44,6 +44,8 @@ public class AddEventDataProfile : Profile
             .ForMember(dest => dest.MaxParticipants, opt
                 => opt.MapFrom(src => src.EventData.MaxParticipants))
             .ForMember(dest => dest.ImageFile, opt
+                => opt.Ignore())
+            .ForMember(dest => dest.EventUsers, opt
                 => opt.Ignore());
     }
 }

@@ -1,8 +1,11 @@
 using EventsApp.Domain.Abstractions.Events;
+using EventsApp.Domain.Abstractions.EventUsers;
 using EventsApp.Domain.Abstractions.Files;
+using EventsApp.Domain.Abstractions.Users;
 using EventsApp.Domain.Errors;
 using EventsApp.Domain.Models;
 using EventsApp.Domain.Models.Events;
+using EventsApp.Domain.Models.Participants;
 using FluentResults;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -13,14 +16,16 @@ public class EventService : IEventService
 {
     private readonly IEventRepository _eventRepository;
     private readonly IFileStorageService _fileStorageService;
+    private readonly IEventUserRepository _eventuserRepository;
     private readonly ILogger<EventService> _logger;
     
     public EventService(IEventRepository eventRepository, IFileStorageService fileService, 
-        ILogger<EventService> logger)
+        ILogger<EventService> logger, IEventUserRepository eventuserRepository)
     {
         _eventRepository = eventRepository;
         _fileStorageService = fileService;
         _logger = logger;
+        _eventuserRepository = eventuserRepository;
     }
 
     public async Task<PaginatedList<EventModel>> GetAllAsync(int pageIndex, int pageSize)
@@ -173,5 +178,16 @@ public class EventService : IEventService
         
         _logger.LogInformation("Изображение успешно добавлено к событию {eventId}", eventId);
         return imageUrl;
+    }
+
+    public async Task<List<UserModel>?> GetParticipantsByIdAsync(Guid eventId)
+    {
+        var eventModel = await _eventRepository.GetByIdAsync(eventId);
+        if (eventModel is null) return null;
+
+        var participants = eventModel.EventUsers.
+            Select(eventUser => eventUser.User)
+            .ToList();
+        return participants;
     }
 }

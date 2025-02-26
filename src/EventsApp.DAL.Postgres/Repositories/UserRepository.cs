@@ -1,6 +1,6 @@
 using AutoMapper;
 using EventsApp.DAL.Context;
-using EventsApp.Domain.Abstractions.Participants;
+using EventsApp.Domain.Abstractions.Users;
 using EventsApp.Domain.Models;
 using EventsApp.Domain.Models.Participants;
 using Microsoft.EntityFrameworkCore;

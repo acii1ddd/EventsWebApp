@@ -1,4 +1,6 @@
 using AutoMapper;
+using EventsApp.Domain.Abstractions.Users;
+using EventsApp.Domain.Errors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventsApp.API.Controllers;
@@ -16,15 +18,9 @@ public class UserController : BaseController
         _mapper = mapper;
     }
 
-    // public async Task<IActionResult> RegisterToEventAsync([FromBody] RegisterUserRequest request)
-    // {
-    //     _userService.RegisterToEventAsync(request.EventId, request.UserId);
-    //     
-    //     
-    //         
-    //     return Ok();
-    // }
-    //
+    
+    // /events/{eventId}/register
+   
     // [HttpGet]
     // public async Task<IActionResult> RegisterToEventAsync([FromBody] RegisterUserRequest request)
     // {
@@ -34,16 +30,4 @@ public class UserController : BaseController
     //         
     //     return Ok();
     // }
-}
-
-public interface IUserService
-{
-    public Task<IActionResult> GetEventParticipantsAsync(Guid eventId);
-}
-
-public class RegisterUserRequest
-{
-    public Guid UserId { get; set; }
-    
-    public Guid EventId { get; set; }
 }

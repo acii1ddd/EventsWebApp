@@ -14,8 +14,6 @@ public class UserEntity
     
     public DateTime BirthDate { get; set; }
     
-    public DateTime EventRegistrationDate { get; set; }
-    
     public string Email { get; set; } = string.Empty;
     
     public string PasswordHash { get; set; } = string.Empty;
@@ -25,14 +23,16 @@ public class UserEntity
     /// <summary>
     /// События этого участника
     /// </summary>
-    public List<EventEntity> Events { get; set; } = [];
-    
+    // public List<EventEntity> Events { get; set; } = [];
+    //
     /// <summary>
     /// Refresh token участника
     /// </summary>
     public RefreshTokenEntity RefreshToken { get; set; } = null!;
     
     //public Guid RefreshTokenId { get; set; }
+    
+    public List<EventUserEntity> EventUsers { get; set; } = [];
 }
 
 public class UserEntityConfiguration : IEntityTypeConfiguration<UserEntity>
@@ -53,7 +53,7 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<UserEntity>
             .HasMaxLength(MaxLength);
         
         builder.Property(x => x.BirthDate).IsRequired();
-        builder.Property(x => x.EventRegistrationDate).IsRequired();
+        // builder.Property(x => x.EventRegistrationDate).IsRequired();
         
         builder.Property(x => x.Email)
             .IsRequired()
@@ -65,12 +65,17 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<UserEntity>
             .HasMaxLength(MaxLength);
         
         // связь с таблицей событий
-        builder.HasMany(x => x.Events)
-            .WithMany(x => x.Participants);
+        // builder.HasMany(x => x.Events)
+        //     .WithMany(x => x.Users);
         
         // связь с таблицей токенов
         builder.HasOne(x => x.RefreshToken)
             .WithOne(x => x.User)
             .HasForeignKey<RefreshTokenEntity>(x => x.UserId);
+        
+        // связь со связующей таблицей с событиями
+        builder.HasMany(x => x.EventUsers)
+            .WithOne(x => x.User)
+            .HasForeignKey(x => x.UserId);
     }
 }

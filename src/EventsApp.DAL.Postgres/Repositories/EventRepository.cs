@@ -52,6 +52,8 @@ public class EventRepository : IEventRepository
             await _context.Events
                 .AsNoTracking()
                 .Include(x => x.ImageFile)
+                .Include(x => x.EventUsers)
+                .ThenInclude(x => x.User)
                 .FirstOrDefaultAsync(x => x.Id == id)
         );
     }

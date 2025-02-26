@@ -1,7 +1,7 @@
 using EventsApp.Configuration;
 using EventsApp.Domain.Abstractions.Auth;
-using EventsApp.Domain.Abstractions.Participants;
 using EventsApp.Domain.Abstractions.RefreshTokens;
+using EventsApp.Domain.Abstractions.Users;
 using EventsApp.Domain.Errors;
 using EventsApp.Domain.Models.Auth;
 using EventsApp.Domain.Models.RefreshTokens;

@@ -1,7 +1,6 @@
-using EventsApp.Domain.Models;
 using EventsApp.Domain.Models.Participants;
 
-namespace EventsApp.Domain.Abstractions.Participants;
+namespace EventsApp.Domain.Abstractions.Users;
 
 public interface IUserRepository : IRepository<UserModel>
 {

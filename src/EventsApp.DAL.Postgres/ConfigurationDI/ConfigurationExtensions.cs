@@ -1,8 +1,9 @@
 using EventsApp.DAL.Repositories;
 using EventsApp.Domain.Abstractions.Events;
+using EventsApp.Domain.Abstractions.EventUsers;
 using EventsApp.Domain.Abstractions.Files;
-using EventsApp.Domain.Abstractions.Participants;
 using EventsApp.Domain.Abstractions.RefreshTokens;
+using EventsApp.Domain.Abstractions.Users;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EventsApp.DAL.ConfigurationDI;
@@ -15,6 +16,7 @@ public static class ConfigurationExtensions
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IFileStorageRepository, FileStorageRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddScoped<IEventUserRepository, EventUserRepository>();
         return services;
     }
 

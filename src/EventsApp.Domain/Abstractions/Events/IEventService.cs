@@ -1,5 +1,6 @@
 using EventsApp.Domain.Models;
 using EventsApp.Domain.Models.Events;
+using EventsApp.Domain.Models.Participants;
 using FluentResults;
 using Microsoft.AspNetCore.Http;
 
@@ -29,4 +30,6 @@ public interface IEventService
         string? category, int pageIndex, int pageSize);
 
     public Task<Result<string>> AddImageAsync(Guid eventId, IFormFile imageFile);
+    
+    public Task<List<UserModel>?> GetParticipantsByIdAsync(Guid eventId);
 }
