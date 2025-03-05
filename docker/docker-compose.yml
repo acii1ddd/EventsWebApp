@@ -7,8 +7,10 @@ services:
       context: ../
       dockerfile: src/EventsApp.API/Dockerfile
     depends_on:
-      - postgres
-      - minio
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
     networks:
       - eventsApp
     environment:
@@ -31,8 +33,13 @@ services:
       - ./postgres:/var/lib/postgresql/data
     ports:
       - "${POSTGRES_LOCAL_PORT}:${POSTGRES_CONTAINER_PORT}"
-    networks:
+    networks: 
       - eventsApp
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     
   minio:
     container_name: minio
@@ -48,9 +55,11 @@ services:
       - "${MINIO_LOCAL_PORT_WEB}:9001"
     networks:
       - eventsApp
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://minio:9000/minio/health/live"]
     
 #volumes:
 #  events_app_postgres_data:
-#    
+
 networks:
   eventsApp:

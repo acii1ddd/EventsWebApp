@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using EventsApp.Domain.Models.EventUsers;
 
 namespace EventsApp.Domain.Abstractions.EventUsers;

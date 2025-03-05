@@ -18,7 +18,7 @@ public class AccountController : BaseController
     
     // TODO: вынести в конфигурацию
     private const string RefreshTokenKey = "refreshToken";
-    private const int ExpiresInMinutes = 1;
+    private const int ExpiresInMinutes = 30;
     
     public AccountController(IAuthService authService, IMapper mapper)
     {

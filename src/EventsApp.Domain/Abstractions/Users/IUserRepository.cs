@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using EventsApp.Domain.Models.Participants;
 
 namespace EventsApp.Domain.Abstractions.Users;

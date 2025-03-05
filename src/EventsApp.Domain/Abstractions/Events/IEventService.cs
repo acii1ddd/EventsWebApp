@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using EventsApp.Domain.Models;
 using EventsApp.Domain.Models.Events;
 using EventsApp.Domain.Models.Participants;

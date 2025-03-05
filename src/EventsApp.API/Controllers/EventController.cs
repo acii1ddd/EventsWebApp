@@ -231,7 +231,7 @@ public class EventController : BaseController
             if (error is UserWithIdNotFoundError or UserWithEmailNotFoundError)
                 return NotFound(error);
 
-            BadRequest(error);
+            return BadRequest(error);
         }
 
         var result = _mapper.Map<GetUserResponse>(participantResult.Value);
@@ -253,7 +253,7 @@ public class EventController : BaseController
             if (error is UserWithIdNotFoundError or UserWithEmailNotFoundError)
                 return NotFound(error);
 
-            BadRequest(error);
+            return BadRequest(error);
         }
         
         return Ok();
