@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace EventsApp.Domain.Models;
 
 public class PaginatedList<T>

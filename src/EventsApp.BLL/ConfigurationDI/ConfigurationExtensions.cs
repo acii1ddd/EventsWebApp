@@ -1,9 +1,7 @@
+using EventsApp.BLL.Interfaces;
+using EventsApp.BLL.Interfaces.Auth;
 using EventsApp.BLL.Services;
 using EventsApp.BLL.Services.Auth;
-using EventsApp.Domain.Abstractions.Auth;
-using EventsApp.Domain.Abstractions.Events;
-using EventsApp.Domain.Abstractions.Files;
-using EventsApp.Domain.Abstractions.Users;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EventsApp.BLL.ConfigurationDI;

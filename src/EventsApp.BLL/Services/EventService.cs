@@ -1,7 +1,5 @@
-using EventsApp.Domain.Abstractions.Events;
-using EventsApp.Domain.Abstractions.EventUsers;
-using EventsApp.Domain.Abstractions.Files;
-using EventsApp.Domain.Abstractions.Users;
+using EventsApp.BLL.Interfaces;
+using EventsApp.DAL.Interfaces;
 using EventsApp.Domain.Errors;
 using EventsApp.Domain.Models;
 using EventsApp.Domain.Models.Events;

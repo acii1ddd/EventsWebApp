@@ -1,5 +1,3 @@
-using System;
-
 namespace EventsApp.Domain.Models.Auth;
 
 public class GenerateTokenPayload

@@ -1,6 +1,7 @@
 using Amazon.S3;
 using Amazon.S3.Model;
-using EventsApp.Domain.Abstractions.Files;
+using EventsApp.BLL.Interfaces;
+using EventsApp.DAL.Interfaces;
 using EventsApp.Domain.Models.Images;
 using Microsoft.Extensions.Logging;
 

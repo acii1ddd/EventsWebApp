@@ -1,4 +1,3 @@
-using System;
 using EventsApp.Domain.Models.Events;
 
 namespace EventsApp.Domain.Models.Images;

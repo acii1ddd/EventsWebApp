@@ -1,7 +1,9 @@
 using AutoMapper;
 using EventsApp.API.Contracts.Events;
+using EventsApp.API.Contracts.Events.Requests;
+using EventsApp.API.Contracts.Events.Responses;
 using EventsApp.API.Contracts.Users;
-using EventsApp.Domain.Abstractions.Events;
+using EventsApp.BLL.Interfaces;
 using EventsApp.Domain.Errors;
 using EventsApp.Domain.Models.Events;
 using FluentResults;

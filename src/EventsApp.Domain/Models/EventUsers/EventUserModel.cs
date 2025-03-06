@@ -1,4 +1,3 @@
-using System;
 using EventsApp.Domain.Models.Events;
 using EventsApp.Domain.Models.Participants;
 

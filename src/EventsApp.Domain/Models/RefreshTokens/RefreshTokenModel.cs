@@ -1,4 +1,3 @@
-using System;
 using EventsApp.Domain.Models.Participants;
 
 namespace EventsApp.Domain.Models.RefreshTokens;

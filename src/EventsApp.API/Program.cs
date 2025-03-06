@@ -81,12 +81,15 @@ public class Program
             .RegisterDalProfiles()
             .RegisterServices()
             .AddContractProfiles()
-            .AddSwagger(); // jwt token int header 
+            .AddSwagger(); // jwt token int header
         
         // auth settings
-        var authSection = builder.Configuration.GetSection("AuthSettings")
-            ?? throw new ApplicationException($"Секция {nameof(AuthSettings)} не найдена в конфигурационном файле");
-                
+        var authSection = builder.Configuration.GetSection("AuthSettings");
+        if (!authSection.Exists()) {
+            throw new InvalidOperationException($"Секция {nameof(AuthSettings)} не найдена в " +
+                $"конфигурационном файле");
+        }
+        
         builder.Services.Configure<AuthSettings>(authSection);
         
         var authSettings = authSection.Get<AuthSettings>() 
@@ -164,7 +167,6 @@ public class Program
         using (var scope = app.Services.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            //context.Database.Migrate();
             await DbInitializer.Initialize(context);
         }
         
@@ -174,9 +176,15 @@ public class Program
         {
             await app.RunAsync();
         }
-        catch (Exception e)
+        catch (InvalidOperationException e)
         {
             logger.LogError("Произошла ошибка при работе приложения {error}", e);
+            Environment.Exit(-1);
+        }
+        catch (Exception e)
+        {
+            logger.LogError("Необработанная ошибка при работе приложения {error}", e);
+            Environment.Exit(-1);
         }
     }
 

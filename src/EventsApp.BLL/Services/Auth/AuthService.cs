@@ -1,7 +1,6 @@
+using EventsApp.BLL.Interfaces.Auth;
 using EventsApp.Configuration;
-using EventsApp.Domain.Abstractions.Auth;
-using EventsApp.Domain.Abstractions.RefreshTokens;
-using EventsApp.Domain.Abstractions.Users;
+using EventsApp.DAL.Interfaces;
 using EventsApp.Domain.Errors;
 using EventsApp.Domain.Models.Auth;
 using EventsApp.Domain.Models.RefreshTokens;

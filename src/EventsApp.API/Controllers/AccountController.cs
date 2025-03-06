@@ -1,6 +1,6 @@
 using AutoMapper;
 using EventsApp.API.Contracts.Auth;
-using EventsApp.Domain.Abstractions.Auth;
+using EventsApp.BLL.Interfaces.Auth;
 using EventsApp.Domain.Errors;
 using EventsApp.Domain.Models.Auth;
 using FluentResults;
@@ -33,6 +33,7 @@ public class AccountController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(Error))]
     public async Task<IActionResult> SignIn([FromBody] SignInRequest request)
     {
+        throw new Exception("ОШИБКА");
         // пользователь уже авторизован
         if (AuthorizedUserId != Guid.Empty)
         {

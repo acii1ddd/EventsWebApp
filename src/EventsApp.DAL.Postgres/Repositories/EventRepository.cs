@@ -1,7 +1,7 @@
 using AutoMapper;
 using EventsApp.DAL.Context;
 using EventsApp.DAL.Entities;
-using EventsApp.Domain.Abstractions.Events;
+using EventsApp.DAL.Interfaces;
 using EventsApp.Domain.Models;
 using EventsApp.Domain.Models.Events;
 using Microsoft.EntityFrameworkCore;
@@ -29,7 +29,7 @@ public class EventRepository : IEventRepository
             .AsNoTracking()
             .OrderBy(x => x.StartDate);
         
-        var totalRecords = await query.CountAsync(); 
+        var totalRecords = await query.CountAsync();
         
         var items = _mapper.Map<List<EventModel>>(await query
             .Skip((pageIndex - 1) * pageSize)

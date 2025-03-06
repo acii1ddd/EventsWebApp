@@ -1,4 +1,3 @@
-using System;
 using FluentResults;
 
 namespace EventsApp.Domain.Errors;

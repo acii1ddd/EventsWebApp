@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using EventsApp.Domain.Models.Auth;
 using EventsApp.Domain.Models.Events;
 

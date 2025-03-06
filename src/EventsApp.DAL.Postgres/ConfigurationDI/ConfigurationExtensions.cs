@@ -1,9 +1,5 @@
+using EventsApp.DAL.Interfaces;
 using EventsApp.DAL.Repositories;
-using EventsApp.Domain.Abstractions.Events;
-using EventsApp.Domain.Abstractions.EventUsers;
-using EventsApp.Domain.Abstractions.Files;
-using EventsApp.Domain.Abstractions.RefreshTokens;
-using EventsApp.Domain.Abstractions.Users;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EventsApp.DAL.ConfigurationDI;
