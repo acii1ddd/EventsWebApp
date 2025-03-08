@@ -17,7 +17,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
     ports:
-      - "49395:80"
+      - "5555:80"
 #      - "49394:443"
     
   postgres:
