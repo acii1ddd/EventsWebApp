@@ -1,8 +1,6 @@
-using AutoMapper;
 using EventsApp.DAL.Context;
 using EventsApp.DAL.Entities;
-using EventsApp.Domain.Abstractions.EventUsers;
-using EventsApp.Domain.Models.EventUsers;
+using EventsApp.DAL.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventsApp.DAL.Repositories;
@@ -10,48 +8,32 @@ namespace EventsApp.DAL.Repositories;
 public class EventUserRepository : IEventUserRepository
 {
     private readonly ApplicationDbContext _context;
-    private readonly IMapper _mapper;
 
-    public EventUserRepository(ApplicationDbContext context, IMapper mapper)
+    public EventUserRepository(ApplicationDbContext context)
     {
         _context = context;
-        _mapper = mapper;
     }
 
-    public async Task<EventUserModel?> GetByEventAndUserIdAsync(Guid eventId, Guid userId)
+    public async Task<EventUserEntity?> GetByEventAndUserIdAsync(Guid eventId, Guid userId, CancellationToken cancellationToken)
     {
-        return _mapper.Map<EventUserModel>(
-            await _context.EventUsers
-                .AsNoTracking()
-                .Include(x => x.User)
-                .Include(x => x.Event)
-                .FirstOrDefaultAsync(x => x.EventId == eventId && x.UserId == userId)
-        );
-    }
-
-    public async Task<EventUserModel> AddAsync(EventUserModel eventUserModel)
-    {
-        var entity = _mapper.Map<EventUserEntity>(eventUserModel);
-        await _context.EventUsers.AddAsync(entity);
-        await _context.SaveChangesAsync();
-        return _mapper.Map<EventUserModel>(entity);
-    }
-
-    public async Task<EventUserModel?> DeleteByEventAndUserIdAsync(Guid eventId, Guid userId)
-    {
-        var entity = await _context.EventUsers
+        return await _context.EventUsers
             .AsNoTracking()
             .Include(x => x.User)
             .Include(x => x.Event)
-            .FirstOrDefaultAsync(x => x.EventId == eventId && x.UserId == userId);
+            .FirstOrDefaultAsync(x => x.EventId == eventId && x.UserId == userId, cancellationToken);
+    }
 
-        if (entity == null)
-        {
-            return null;
-        }
-        
-        _context.EventUsers.Remove(entity);
-        await _context.SaveChangesAsync();
-        return _mapper.Map<EventUserModel>(entity);
+    public async Task<EventUserEntity> AddAsync(EventUserEntity eventUserEntity, CancellationToken cancellationToken)
+    {
+        await _context.EventUsers.AddAsync(eventUserEntity, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+        return eventUserEntity;
+    }
+
+    public async Task<EventUserEntity> DeleteEventUserAsync(EventUserEntity eventUserEntity, CancellationToken cancellationToken)
+    {
+        _context.EventUsers.Remove(eventUserEntity);
+        await _context.SaveChangesAsync(cancellationToken);
+        return eventUserEntity;
     }
 }

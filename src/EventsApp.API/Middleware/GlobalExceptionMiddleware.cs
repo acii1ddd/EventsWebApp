@@ -1,4 +1,6 @@
 using System.Net;
+using EventsApp.Domain.Exceptions;
+using EventsApp.Domain.Models;
 
 namespace EventsApp.API.Middleware;
 
@@ -21,11 +23,24 @@ public class GlobalExceptionMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Возникло необработанное исключение");
+            var (statusCode, errorMessage) = ex switch
+            {
+                InvalidOperationException operationEx => (HttpStatusCode.BadRequest, operationEx.Message),
+                NotFoundException notFoundEx => (HttpStatusCode.NotFound, notFoundEx.Message),
+                OperationCanceledException canceledEx => (HttpStatusCode.RequestTimeout, canceledEx.Message),
+                _ => (HttpStatusCode.InternalServerError, "Необработанная ошибка сервера")
+            };
             
-            context.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
+            context.Response.StatusCode = (int) statusCode;
             context.Response.ContentType = "application/json";
-            await context.Response.WriteAsJsonAsync(new { message = ex.Message });
+
+            var response = new ErrorResponse
+            {
+                ErrorMessage = errorMessage,
+                Trace = ex.StackTrace
+            };
+            _logger.LogError(ex, "Произошла ошибка при работе приложения: {errorMessage}", errorMessage);
+            await context.Response.WriteAsJsonAsync(response);
         }
     }
 }

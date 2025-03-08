@@ -1,8 +1,6 @@
-using AutoMapper;
 using EventsApp.DAL.Context;
 using EventsApp.DAL.Entities;
-using EventsApp.Domain.Abstractions.RefreshTokens;
-using EventsApp.Domain.Models.RefreshTokens;
+using EventsApp.DAL.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventsApp.DAL.Repositories;
@@ -10,54 +8,37 @@ namespace EventsApp.DAL.Repositories;
 public class RefreshTokenRepository : IRefreshTokenRepository
 {
     private readonly ApplicationDbContext _context;
-    private readonly IMapper _mapper;
 
-    public RefreshTokenRepository(ApplicationDbContext context, IMapper mapper)
+    public RefreshTokenRepository(ApplicationDbContext context)
     {
         _context = context;
-        _mapper = mapper;
     }
 
-    public async Task<RefreshTokenModel> AddAsync(RefreshTokenModel refreshTokenModel)
+    public async Task<RefreshTokenEntity> AddAsync(RefreshTokenEntity refreshToken, CancellationToken cancellationToken)
     {
-        var entity = _mapper.Map<RefreshTokenEntity>(refreshTokenModel);
-        
-        await _context.RefreshTokens.AddAsync(entity);
-        await _context.SaveChangesAsync();
-        return _mapper.Map<RefreshTokenModel>(entity);
+        await _context.RefreshTokens.AddAsync(refreshToken, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+        return refreshToken;
     }
 
-    public async Task<RefreshTokenModel?> DeleteByIdAsync(Guid id)
+    public async Task<RefreshTokenEntity> DeleteAsync(RefreshTokenEntity refreshToken, CancellationToken cancellationToken)
     {
-        var entity = await _context.RefreshTokens
+        _context.RefreshTokens.Remove(refreshToken);
+        await _context.SaveChangesAsync(cancellationToken);
+        return refreshToken;
+    }
+
+    public async Task<RefreshTokenEntity?> GetByTokenAsync(string refreshToken, CancellationToken cancellationToken)
+    {
+        return await _context.RefreshTokens
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == id);
-
-        if (entity is null)
-        {
-            return null;
-        }
-        
-        _context.RefreshTokens.Remove(entity);
-        await _context.SaveChangesAsync();
-        return _mapper.Map<RefreshTokenModel>(entity);
-    }
-
-    public async Task<RefreshTokenModel?> GetByTokenAsync(string refreshToken)
-    {
-        return _mapper.Map<RefreshTokenModel>(
-            await _context.RefreshTokens
-            .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Token == refreshToken)
-        );
+            .FirstOrDefaultAsync(x => x.Token == refreshToken, cancellationToken);
     }
     
-    public async Task<RefreshTokenModel?> GetByUserIdAsync(Guid userId)
+    public async Task<RefreshTokenEntity?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken)
     {
-        return _mapper.Map<RefreshTokenModel>(
-            await _context.RefreshTokens
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.UserId == userId)
-        );
+        return await _context.RefreshTokens
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.UserId == userId, cancellationToken: cancellationToken);
     }
 }

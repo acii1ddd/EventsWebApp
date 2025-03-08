@@ -1,9 +1,7 @@
-using AutoMapper;
 using EventsApp.DAL.Context;
 using EventsApp.DAL.Entities;
-using EventsApp.Domain.Abstractions.Events;
+using EventsApp.DAL.Interfaces;
 using EventsApp.Domain.Models;
-using EventsApp.Domain.Models.Events;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventsApp.DAL.Repositories;
@@ -11,123 +9,99 @@ namespace EventsApp.DAL.Repositories;
 public class EventRepository : IEventRepository
 {
     private readonly ApplicationDbContext _context;
-    private readonly IMapper _mapper;
     
-    public EventRepository(ApplicationDbContext context, IMapper mapper)
+    public EventRepository(ApplicationDbContext context)
     {
         _context = context;
-        _mapper = mapper;
     }
 
     /// <summary>
     /// Получение списка всех событий
     /// </summary>
     /// <returns>Список событий либо пустой список</returns>
-    public async Task<PaginatedList<EventModel>> GetAllAsync(int pageIndex, int pageSize)
+    public async Task<PaginatedList<EventEntity>> GetAllAsync(int pageIndex, int pageSize,
+        CancellationToken cancellationToken)
     {
         var query = _context.Events
             .AsNoTracking()
             .OrderBy(x => x.StartDate);
         
-        var totalRecords = await query.CountAsync(); 
+        var totalRecords = await query.CountAsync(cancellationToken);
         
-        var items = _mapper.Map<List<EventModel>>(await query
+        var items = await query
             .Skip((pageIndex - 1) * pageSize)
             .Take(pageSize)
             .Include(x => x.ImageFile)
-            .ToListAsync()
-        );
+            .ToListAsync(cancellationToken);
         
         var totalPages = (int) Math.Ceiling(totalRecords / (double)pageSize);
-        return new PaginatedList<EventModel>(items, pageIndex, totalPages);
+        return new PaginatedList<EventEntity>(items, pageIndex, totalPages);
     }
 
     /// <summary>
     /// Получение события по Id
     /// </summary>
     /// <param name="id"></param>
-    public async Task<EventModel?> GetByIdAsync(Guid id)
+    /// <param name="cancellationToken"></param>
+    public async Task<EventEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return _mapper.Map<EventModel>(
-            await _context.Events
-                .AsNoTracking()
-                .Include(x => x.ImageFile)
-                .Include(x => x.EventUsers)
-                .ThenInclude(x => x.User)
-                .FirstOrDefaultAsync(x => x.Id == id)
-        );
+        return await _context.Events
+            .AsNoTracking()
+            .Include(x => x.ImageFile)
+            .Include(x => x.EventUsers)
+            .ThenInclude(x => x.User)
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
-    
+
     /// <summary>
     /// Получение события по его названию
     /// </summary>
     /// <param name="name"></param>
-    public async Task<EventModel?> GetByNameAsync(string name)
+    /// <param name="cancellationToken"></param>
+    public async Task<EventEntity?> GetByNameAsync(string name, CancellationToken cancellationToken)
     {
-        return _mapper.Map<EventModel>(
-            await _context.Events
-                .AsNoTracking()
-                .Where(x => x.Name.ToLower() == name.ToLower())
-                .Include(x => x.ImageFile)
-                .FirstOrDefaultAsync()
-        );
+        return await _context.Events
+            .AsNoTracking()
+            .Where(x => x.Name.ToLower() == name.ToLower())
+            .Include(x => x.ImageFile)
+            .FirstOrDefaultAsync(cancellationToken);
     }
-    
+
     /// <summary>
     /// Добавление нового события
     /// </summary>
-    /// <param name="eventModel"></param>
-    public async Task<EventModel> AddAsync(EventModel eventModel)
+    /// <param name="eventEntity"></param>
+    /// <param name="cancellationToken"></param>
+    public async Task<EventEntity> AddAsync(EventEntity eventEntity, CancellationToken cancellationToken)
     {
-        var eventEntity = _mapper.Map<EventEntity>(eventModel);
-        
-        await _context.Events.AddAsync(eventEntity);
-        await _context.SaveChangesAsync();
-        return _mapper.Map<EventModel>(eventEntity);
+        await _context.Events.AddAsync(eventEntity, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+        return eventEntity;
     }
 
     /// <summary>
     /// Изменение информации о событии
     /// </summary>
-    /// <param name="newEventModel"></param>
-    public async Task<EventModel?> UpdateAsync(EventModel newEventModel)
+    /// <param name="newEventEntity"></param>
+    /// <param name="cancellationToken"></param>
+    public async Task<EventEntity> UpdateAsync(EventEntity newEventEntity, CancellationToken cancellationToken)
     {
-        var entity = await _context.Events
-            .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == newEventModel.Id);
-
-        if (entity is null)
-        {
-            return null;
-        }
-        
-        var eventEntity = _mapper.Map<EventEntity>(newEventModel);
-        _context.Events.Update(eventEntity);
-        await _context.SaveChangesAsync();
-        return _mapper.Map<EventModel>(eventEntity);
+        _context.Events.Update(newEventEntity);
+        await _context.SaveChangesAsync(cancellationToken);
+        return newEventEntity;
     }
-    
+
     /// <summary>
     /// Удаление события
     /// </summary>
-    /// <param name="id"></param>
+    /// <param name="entity"></param>
+    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task<EventModel?> DeleteByIdAsync(Guid id)
+    public async Task<EventEntity> DeleteAsync(EventEntity entity, CancellationToken cancellationToken)
     {
-        var entity = _context.Events
-            .AsNoTracking()
-            .Include(x => x.ImageFile)
-            .FirstOrDefault(x => x.Id == id);
-
-        if (entity is null)
-        {
-            return null;
-        }
-        
         _context.Events.Remove(entity);
-        await _context.SaveChangesAsync();
-        
-        return _mapper.Map<EventModel>(entity);
+        await _context.SaveChangesAsync(cancellationToken);
+        return entity;
     }
 
     /// <summary>
@@ -138,8 +112,9 @@ public class EventRepository : IEventRepository
     /// <param name="category"></param>
     /// <param name="pageIndex"></param>
     /// <param name="pageSize"></param>
-    public async Task<PaginatedList<EventModel>> GetByFilterAsync(DateTime? minDate, string? location, 
-        string? category, int pageIndex, int pageSize)
+    /// <param name="cancellationToken"></param>
+    public async Task<PaginatedList<EventEntity>> GetByFilterAsync(DateTime? minDate, string? location, 
+        string? category, int pageIndex, int pageSize, CancellationToken cancellationToken)
     {
         var query = _context.Events.AsNoTracking();
 
@@ -158,18 +133,18 @@ public class EventRepository : IEventRepository
             query = query.Where(x => x.Category.ToLower().Contains(category.ToLower()));
         }
         
-        var totalRecords = await query.CountAsync();
+        var totalRecords = await query.CountAsync(cancellationToken);
         
         // округляем в большую сторону, чтобы забрать последнюю неполную страницу
         var totalPages = (int) Math.Ceiling(totalRecords / (double)pageSize);
 
-        var items = _mapper.Map<List<EventModel>>(await query
+        var items = await query
             .OrderBy(x => x.StartDate)
             .Skip((pageIndex - 1) * pageSize)
             .Take(pageSize)
             .Include(x => x.ImageFile)
-            .ToListAsync()
-        );
-        return new PaginatedList<EventModel>(items, pageIndex, totalPages);
+            .ToListAsync(cancellationToken);
+        
+        return new PaginatedList<EventEntity>(items, pageIndex, totalPages);
     }
 }

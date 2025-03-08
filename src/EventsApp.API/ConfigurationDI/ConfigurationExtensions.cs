@@ -1,4 +1,4 @@
-using EventsApp.API.Contracts.Validators;
+using EventsApp.API.ContractValidators.Events;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 

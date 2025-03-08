@@ -1,4 +1,4 @@
-using EventsApp.Domain.Abstractions.Auth;
+using EventsApp.BLL.Interfaces.Auth;
 
 namespace EventsApp.BLL.Services.Auth;
 

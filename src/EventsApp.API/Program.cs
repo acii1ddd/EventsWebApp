@@ -30,12 +30,6 @@ public class Program
         
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
-        // builder.Services.AddSwaggerGen(options =>
-        // {
-        //     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-        //     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-        //     options.IncludeXmlComments(xmlPath);
-        // });
 
         builder.Services.AddSwaggerGen();
 
@@ -69,28 +63,31 @@ public class Program
             var credentials = new BasicAWSCredentials(awsOptions.AccessKey, awsOptions.SecretKey);
             
             var s3Client = new AmazonS3Client(credentials, config);
+            
             // блокир основной поток для создания бакета
-            EnsureBucketExistsAsync(s3Client).GetAwaiter().GetResult();
-                
+            S3Initializer.EnsureBucketExistsAsync(s3Client).GetAwaiter().GetResult();
             return s3Client;
         });
 
         // registration
         builder.Services
             .RegisterRepositories()
-            .RegisterDalProfiles()
+            .RegisterBllProfiles()
             .RegisterServices()
             .AddContractProfiles()
-            .AddSwagger(); // jwt token int header 
+            .AddSwagger(); // jwt token int header
         
         // auth settings
-        var authSection = builder.Configuration.GetSection("AuthSettings")
-            ?? throw new ApplicationException($"Секция {nameof(AuthSettings)} не найдена в конфигурационном файле");
-                
+        var authSection = builder.Configuration.GetSection("AuthSettings");
+        if (!authSection.Exists()) 
+        {
+            throw new ApplicationException($"Секция {nameof(AuthSettings)} не найдена в конфигурационном файле");
+        }
+        
         builder.Services.Configure<AuthSettings>(authSection);
         
         var authSettings = authSection.Get<AuthSettings>() 
-            ?? throw new InvalidOperationException("Не удалось сопоставить параметры аутентификации");
+            ?? throw new ApplicationException("Не удалось сопоставить параметры аутентификации");
         
         builder.Services
             .AddAuthentication(options =>
@@ -164,7 +161,6 @@ public class Program
         using (var scope = app.Services.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            //context.Database.Migrate();
             await DbInitializer.Initialize(context);
         }
         
@@ -174,26 +170,15 @@ public class Program
         {
             await app.RunAsync();
         }
-        catch (Exception e)
+        catch (ApplicationException e)
         {
             logger.LogError("Произошла ошибка при работе приложения {error}", e);
+            Environment.Exit(-1);
         }
-    }
-
-    /// <summary>
-    /// Создание бакета если его еще нету 
-    /// </summary>
-    /// <param name="s3Client"></param>
-    private static async Task EnsureBucketExistsAsync(AmazonS3Client s3Client)
-    {
-        const string bucketName = "event-pictures";
-        try
+        catch (Exception e)
         {
-            await s3Client.GetBucketLocationAsync(bucketName);
-        }
-        catch (AmazonS3Exception e) when(e.StatusCode == System.Net.HttpStatusCode.NotFound)
-        {
-            await s3Client.PutBucketAsync(bucketName);
+            logger.LogError("Необработанная ошибка при работе приложения {error}", e);
+            Environment.Exit(-1);
         }
     }
 }

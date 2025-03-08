@@ -12,15 +12,11 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="AutoMapper" Version="14.0.0" />
       <PackageReference Include="AWSSDK.S3" Version="4.0.0-preview.7" />
       <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+      <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.0" />
       <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.6.0" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Reference Include="Microsoft.AspNetCore.Http.Features">
-        <HintPath>C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App\8.0.11\Microsoft.AspNetCore.Http.Features.dll</HintPath>
-      </Reference>
     </ItemGroup>
 
 </Project>

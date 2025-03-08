@@ -1,5 +1,5 @@
+using EventsApp.BLL.Interfaces.Auth;
 using EventsApp.BLL.Services.Auth;
-using EventsApp.Domain.Abstractions.Auth;
 using Xunit.Abstractions;
 
 namespace EventApp.DAL.Tests;

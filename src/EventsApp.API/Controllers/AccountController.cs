@@ -1,9 +1,8 @@
 using AutoMapper;
 using EventsApp.API.Contracts.Auth;
-using EventsApp.Domain.Abstractions.Auth;
-using EventsApp.Domain.Errors;
+using EventsApp.BLL.Interfaces.Auth;
+using EventsApp.Domain.Models;
 using EventsApp.Domain.Models.Auth;
-using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,7 +17,7 @@ public class AccountController : BaseController
     
     // TODO: вынести в конфигурацию
     private const string RefreshTokenKey = "refreshToken";
-    private const int ExpiresInMinutes = 1;
+    private const int ExpiresInMinutes = 30;
     
     public AccountController(IAuthService authService, IMapper mapper)
     {
@@ -29,43 +28,36 @@ public class AccountController : BaseController
     [AllowAnonymous]
     [HttpPost("sign-in")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SignInResponse))]
-    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(Error))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(Error))]
-    public async Task<IActionResult> SignIn([FromBody] SignInRequest request)
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResponse))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse))]
+    public async Task<IActionResult> SignIn([FromBody] SignInRequest request, CancellationToken cancellationToken)
     {
         // пользователь уже авторизован
         if (AuthorizedUserId != Guid.Empty)
         {
-            return BadRequest(new Error($"Пользователь с email {request.Email} уже авторизован"));
+            return BadRequest(new ErrorResponse
+            {
+                ErrorMessage = $"Пользователь с email {request.Email} уже авторизован",
+                Trace = string.Empty
+            });
         }
         
         var signInModel = _mapper.Map<SignInModel>(request); 
-        var authTokenModelResult = await _authService.SignIn(signInModel);
-        
-        if (authTokenModelResult.IsFailed)
-        {
-            var error = authTokenModelResult.Errors.FirstOrDefault();
-            
-            if (error is UserWithEmailNotFoundError)
-            {
-                return NotFound(error);
-            }
-            return BadRequest(error);
-        }
+        var authTokenModel = await _authService.SignIn(signInModel, cancellationToken);
         
         // устанавливаем refresh token в cookie
-        SetRefreshTokenToCookie(authTokenModelResult.Value.RefreshToken);
-
-        var result = _mapper.Map<SignInResponse>(authTokenModelResult.Value.AuthAccessTokenModel);
+        SetRefreshTokenToCookie(authTokenModel.RefreshToken);
+        
+        var result = _mapper.Map<SignInResponse>(authTokenModel.AuthAccessTokenModel);
         return Ok(result);
     }
 
     [AllowAnonymous]
     [HttpPost("refresh-tokens")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SignInResponse))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse))]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(List<Error>))]
-    public async Task<IActionResult> RefreshTokens()
+    public async Task<IActionResult> RefreshTokens(CancellationToken cancellationToken)
     {
         var refreshToken = Request.Cookies[RefreshTokenKey];
         if (refreshToken is null)
@@ -73,34 +65,29 @@ public class AccountController : BaseController
             return Unauthorized(); // need to relogin
         }
 
-        var authTokenModelResult = await _authService.GetNewTokensPairAsync(refreshToken);
-        if (authTokenModelResult.IsFailed)
-        {
-            return BadRequest(authTokenModelResult.Errors);
-        }
-        
-        SetRefreshTokenToCookie(authTokenModelResult.Value.RefreshToken);
-        var result = _mapper.Map<SignInResponse>(authTokenModelResult.Value.AuthAccessTokenModel);
+        var authTokenModel = await _authService.GetNewTokensPairAsync(refreshToken, cancellationToken);
+        SetRefreshTokenToCookie(authTokenModel.RefreshToken);
+        var result = _mapper.Map<SignInResponse>(authTokenModel.AuthAccessTokenModel);
         return Ok(result);
     }
-    
+
+    [Authorize]
     [HttpPost("logout")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResponse))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
-    public async Task<IActionResult> Logout()
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> Logout(CancellationToken cancellationToken)
     {
-        if (AuthorizedUserId == Guid.Empty)
-        {            
-            return BadRequest("Пользователь не авторизован");
-        }
-        
+        // refresh token пользователя истек
         var refreshToken = Request.Cookies[RefreshTokenKey];
         if (refreshToken is null)
         {
-            return BadRequest("Refresh token не найден");
+            return BadRequest("Refresh token пользователя истек");
         }
-
-        _ = await _authService.LogoutAsync(refreshToken);
+        
+        await _authService.LogoutAsync(refreshToken, cancellationToken);
+        Response.Cookies.Delete(RefreshTokenKey);
         return Ok();
     }
     
