@@ -4,19 +4,19 @@ namespace EventsApp.API.Contracts.Users;
 
 public class GetUserResponse
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
     
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; init; } = string.Empty;
     
-    public string Surname { get; set; } = string.Empty;
+    public string Surname { get; init; } = string.Empty;
     
-    public DateTime BirthDate { get; set; }
+    public DateTime BirthDate { get; init; }
     
-    public DateTime EventRegistrationDate { get; set; }
+    public DateTime EventRegistrationDate { get; init; }
     
-    public string Email { get; set; } = string.Empty;
+    public string Email { get; init; } = string.Empty;
     
-    public string PasswordHash { get; set; } = string.Empty;
+    public string PasswordHash { get; init; } = string.Empty;
     
-    public UserRole Role { get; set; }
+    public UserRole Role { get; init; }
 }

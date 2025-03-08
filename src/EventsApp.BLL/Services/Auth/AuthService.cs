@@ -1,10 +1,12 @@
+using AutoMapper;
 using EventsApp.BLL.Interfaces.Auth;
 using EventsApp.Configuration;
+using EventsApp.DAL.Entities;
 using EventsApp.DAL.Interfaces;
-using EventsApp.Domain.Errors;
+using EventsApp.Domain.Exceptions;
 using EventsApp.Domain.Models.Auth;
+using EventsApp.Domain.Models.Participants;
 using EventsApp.Domain.Models.RefreshTokens;
-using FluentResults;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -17,6 +19,7 @@ public class AuthService : IAuthService
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly ILogger<AuthService> _logger;
     private readonly AuthSettings _authSettings;
+    private readonly IMapper _mapper;
 
     // TODO: вынести в конфигурацию
     private const int LifeTimeInMinutes = 30;
@@ -26,30 +29,33 @@ public class AuthService : IAuthService
         IPasswordHashService passwordHashService,
         IRefreshTokenRepository refreshTokenRepository,
         IOptions<AuthSettings> authSettings, 
-        ILogger<AuthService> logger)
+        ILogger<AuthService> logger, IMapper mapper)
     {
         _userRepository = userRepository;
         _passwordHashService = passwordHashService;
         _refreshTokenRepository = refreshTokenRepository;
         _logger = logger;
+        _mapper = mapper;
         _authSettings = authSettings.Value;
     }
 
-    public async Task<Result<AuthTokenModel>> SignIn(SignInModel signInModel)
+    public async Task<AuthTokenModel> SignIn(SignInModel signInModel, CancellationToken cancellationToken)
     {
-        var userSignInDetails = await _userRepository.GetByEmailAsync(signInModel.Email);
+        var userSignInDetails = _mapper.Map<UserModel>(await _userRepository
+            .GetByEmailAsync(signInModel.Email, cancellationToken));
 
-        if (userSignInDetails is null) {
-            return Result.Fail(new UserWithEmailNotFoundError(signInModel.Email));
+        if (userSignInDetails is null)
+        {
+            throw new NotFoundException($"Пользователь с email {signInModel.Email} не найден");
         }
-
-        if (!_passwordHashService.Verify(signInModel.Password, userSignInDetails.PasswordHash)) {
-            return Result.Fail(new Error("Неверный пароль"));
+        if (!_passwordHashService.Verify(signInModel.Password, userSignInDetails.PasswordHash)) 
+        {
+            throw new InvalidOperationException("Неверный пароль");
         }
-
-        if (await _refreshTokenRepository.GetByUserIdAsync(userSignInDetails.Id) is not null) {
-            return Result.Fail(new Error($"У пользователя с email " +
-                    $"{userSignInDetails.Email} есть действующий refresh token"));
+        if (await _refreshTokenRepository.GetByUserIdAsync(userSignInDetails.Id, cancellationToken) is not null) 
+        {
+            throw new InvalidOperationException($"У пользователя с email {userSignInDetails.Email} есть " +
+                $"действующий refresh token");
         }
         
         // сгенерируем access token
@@ -72,8 +78,8 @@ public class AuthService : IAuthService
             UserId = userSignInDetails.Id
         };
         
-        
-        _ = await _refreshTokenRepository.AddAsync(refreshTokenModel);
+        _ = await _refreshTokenRepository
+            .AddAsync(_mapper.Map<RefreshTokenEntity>(refreshTokenModel), cancellationToken);
         
         return new AuthTokenModel
         {
@@ -82,20 +88,26 @@ public class AuthService : IAuthService
         };
     }
 
-    public async Task<Result<AuthTokenModel>> GetNewTokensPairAsync(string refreshToken)
+    public async Task<AuthTokenModel> GetNewTokensPairAsync(string refreshToken, CancellationToken cancellationToken)
     {
-        var refreshTokenModel = await _refreshTokenRepository.GetByTokenAsync(refreshToken);
-        if (refreshTokenModel is null) {
-            return Result.Fail(new Error($"Токен {refreshToken} не найден."));
+        var refreshTokenModel = _mapper.Map<RefreshTokenModel>(await _refreshTokenRepository
+            .GetByTokenAsync(refreshToken, cancellationToken));
+        
+        if (refreshTokenModel is null) 
+        {
+            throw new InvalidOperationException($"Сущность токена {refreshToken} не найдена");
         }
 
-        var userDetails = await _userRepository.GetByIdAsync(refreshTokenModel.UserId);
-        if (userDetails is null) {
-            return Result.Fail(new Error($"Пользователь с Id {refreshTokenModel.UserId} не найден."));
+        var userDetails = _mapper.Map<UserModel>(await _userRepository
+            .GetByIdAsync(refreshTokenModel.UserId, cancellationToken));
+        
+        if (userDetails is null) 
+        {
+            throw new InvalidOperationException($"Пользователь с Id {refreshTokenModel.UserId} не найден.");
         }
         
         // сгенерируем новую пару токенов
-        var authAccessTokenModel = AuthTokenGenerator.GenerateAccessToken(new GenerateTokenPayload
+        var newAuthAccessTokenModel = AuthTokenGenerator.GenerateAccessToken(new GenerateTokenPayload
         {
             UserId = userDetails.Id,
             UserRole = userDetails.Role
@@ -113,27 +125,32 @@ public class AuthService : IAuthService
         };
         
         // удалим старый токен пользователя и добавим новый
-        _ = await _refreshTokenRepository.DeleteByIdAsync(refreshTokenModel.Id);
-        _ = await _refreshTokenRepository.AddAsync(newRefreshTokenModel);
+        _ = await _refreshTokenRepository
+            .DeleteAsync(_mapper.Map<RefreshTokenEntity>(refreshTokenModel), cancellationToken);
+        _ = await _refreshTokenRepository
+            .AddAsync(_mapper.Map<RefreshTokenEntity>(newRefreshTokenModel), cancellationToken);
         
         return new AuthTokenModel
         {
-            AuthAccessTokenModel = authAccessTokenModel,
+            AuthAccessTokenModel = newAuthAccessTokenModel,
             RefreshToken = newRefreshToken
         };
     }
 
-    public async Task<bool> LogoutAsync(string refreshToken)
+    public async Task LogoutAsync(string refreshToken, CancellationToken cancellationToken)
     {
-        var refreshTokenModel = await _refreshTokenRepository.GetByTokenAsync(refreshToken);
+        var refreshTokenModel = _mapper.Map<RefreshTokenModel>(await _refreshTokenRepository
+            .GetByTokenAsync(refreshToken, cancellationToken));
+        
         if (refreshTokenModel is null)
         {
-            _logger.LogInformation("Refresh token не найден");
-            return false;
+            _logger.LogInformation("Сущность токена {token} не найдена", refreshToken);
+            throw new NotFoundException($"Сущность токена {refreshToken} не найдена");
         }
         
-        _ = await _refreshTokenRepository.DeleteByIdAsync(refreshTokenModel.Id);
-        _logger.LogInformation("Refresh token {token} успешно удален", refreshTokenModel.Token);
-        return true;
+        _ = await _refreshTokenRepository
+            .DeleteAsync(_mapper.Map<RefreshTokenEntity>(refreshTokenModel), cancellationToken);
+        
+        _logger.LogInformation("Сущность токена {token} успешно удалена", refreshTokenModel.Token);
     }
 }

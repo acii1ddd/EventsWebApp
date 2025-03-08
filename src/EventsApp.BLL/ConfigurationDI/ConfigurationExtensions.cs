@@ -16,4 +16,13 @@ public static class ConfigurationExtensions
         services.AddScoped<IPasswordHashService, PasswordHashService>();
         return services;
     }
+    
+    public static IServiceCollection RegisterBllProfiles(this IServiceCollection services)
+    {
+        services.AddAutoMapper(config =>
+        {
+            config.AddMaps(typeof(ConfigurationExtensions).Assembly);
+        });
+        return services;
+    }
 }

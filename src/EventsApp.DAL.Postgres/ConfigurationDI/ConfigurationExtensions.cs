@@ -15,13 +15,4 @@ public static class ConfigurationExtensions
         services.AddScoped<IEventUserRepository, EventUserRepository>();
         return services;
     }
-
-    public static IServiceCollection RegisterDalProfiles(this IServiceCollection services)
-    {
-        services.AddAutoMapper(config =>
-        {
-            config.AddMaps(typeof(ConfigurationExtensions).Assembly);
-        });
-        return services;
-    }
 }

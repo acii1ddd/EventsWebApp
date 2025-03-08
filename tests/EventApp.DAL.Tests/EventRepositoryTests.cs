@@ -29,7 +29,7 @@ public class EventRepositoryTests
         _contextMock = new Mock<ApplicationDbContext>(new DbContextOptions<ApplicationDbContext>());
         _mapperMock = new Mock<IMapper>();
         
-        _repository = new EventRepository(_contextMock.Object, _mapperMock.Object);
+        _repository = new EventRepository(_contextMock.Object);
     }
 
     [Fact]
@@ -79,7 +79,9 @@ public class EventRepositoryTests
         _contextMock.Setup(m => m.Events).Returns(dbSetMock.Object);
         
         // Act
-        var result = await _repository.GetAllAsync(1, 1);
+        var cancellationTokenSource = new CancellationTokenSource();
+        var cancellationToken = cancellationTokenSource.Token;
+        var result = await _repository.GetAllAsync(1, 1, cancellationToken);
 
         // Assert
         Assert.NotNull(result);

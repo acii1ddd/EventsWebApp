@@ -1,13 +1,12 @@
 using EventsApp.Domain.Models.Auth;
-using FluentResults;
 
 namespace EventsApp.BLL.Interfaces.Auth;
 
 public interface IAuthService
 {
-    public Task<Result<AuthTokenModel>> SignIn(SignInModel signInModel);
+    public Task<AuthTokenModel> SignIn(SignInModel signInModel, CancellationToken cancellationToken);
     
-    public Task<Result<AuthTokenModel>> GetNewTokensPairAsync(string refreshToken);
+    public Task<AuthTokenModel> GetNewTokensPairAsync(string refreshToken, CancellationToken cancellationToken);
     
-    public Task<bool> LogoutAsync(string refreshToken);
+    public Task LogoutAsync(string refreshToken, CancellationToken cancellationToken);
 }

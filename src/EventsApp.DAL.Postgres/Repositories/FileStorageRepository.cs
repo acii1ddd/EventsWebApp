@@ -1,8 +1,6 @@
-using AutoMapper;
 using EventsApp.DAL.Context;
 using EventsApp.DAL.Entities;
 using EventsApp.DAL.Interfaces;
-using EventsApp.Domain.Models.Images;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventsApp.DAL.Repositories;
@@ -10,80 +8,51 @@ namespace EventsApp.DAL.Repositories;
 public class FileStorageRepository : IFileStorageRepository
 {
     private readonly ApplicationDbContext _context;
-    private IMapper _mapper;
 
-    public FileStorageRepository(ApplicationDbContext context, IMapper mapper)
+    public FileStorageRepository(ApplicationDbContext context)
     {
         _context = context;
-        _mapper = mapper;
     }
     
-    public async Task<List<ImageFileModel>> GetAllAsync()
+    public async Task<List<ImageFileEntity>> GetAllAsync(CancellationToken cancellationToken)
     {
-        return _mapper.Map<List<ImageFileModel>>(
-            await _context.ImageFiles
+        return await _context.ImageFiles
             .AsNoTracking()
-            .ToListAsync()
-        );
+            .ToListAsync(cancellationToken: cancellationToken);
     }
     
-    public async Task<ImageFileModel?> GetByIdAsync(Guid id)
+    public async Task<ImageFileEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return _mapper.Map<ImageFileModel>(
-            await _context.ImageFiles
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == id)
-        );
-    }
-    
-    public async Task<ImageFileModel?> GetByEventIdAsync(Guid eventId)
-    {
-        return _mapper.Map<ImageFileModel>(
-            await _context.ImageFiles
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.EventId == eventId)
-        );
-    }
-    
-    public async Task<ImageFileModel> AddAsync(ImageFileModel imageFile)
-    {
-        var imageFileEntity = _mapper.Map<ImageFileEntity>(imageFile);
-        await _context.ImageFiles.AddAsync(imageFileEntity);
-        await _context.SaveChangesAsync();
-        
-        return _mapper.Map<ImageFileModel>(imageFileEntity);
-    }
-    
-    public async Task<ImageFileModel?> UpdateAsync(ImageFileModel imageFile)
-    {
-        var image = _context.ImageFiles
+        return await _context.ImageFiles
             .AsNoTracking()
-            .FirstOrDefault(x => x.Id == imageFile.Id);
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken: cancellationToken);
+    }
 
-        if (image is null)
-        {
-            return null;
-        }
-        
-        var imageEntity = _mapper.Map<ImageFileEntity>(imageFile);
-        _context.ImageFiles.Update(imageEntity);
-        await _context.SaveChangesAsync();
-        return _mapper.Map<ImageFileModel>(image);
+    public async Task<ImageFileEntity?> GetByEventIdAsync(Guid eventId, CancellationToken cancellationToken)
+    {
+        return await _context.ImageFiles
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.EventId == eventId, cancellationToken);
     }
     
-    public async Task<ImageFileModel?> DeleteByIdAsync(Guid id)
+    public async Task<ImageFileEntity> AddAsync(ImageFileEntity imageFile, CancellationToken cancellationToken)
     {
-        var image = _context.ImageFiles
-            .AsNoTracking()
-            .FirstOrDefault(x => x.Id == id);
-
-        if (image is null)
-        {
-            return null;
-        }
-        
-        _context.ImageFiles.Remove(image);
-        await _context.SaveChangesAsync();
-        return _mapper.Map<ImageFileModel>(image);
+        await _context.ImageFiles.AddAsync(imageFile, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+        return imageFile;
+    }
+    
+    public async Task<ImageFileEntity> UpdateAsync(ImageFileEntity imageFile, CancellationToken cancellationToken)
+    {
+        _context.ImageFiles.Update(imageFile);
+        await _context.SaveChangesAsync(cancellationToken);
+        return imageFile;
+    }
+    
+    public async Task<ImageFileEntity> DeleteAsync(ImageFileEntity imageFile, CancellationToken cancellationToken)
+    {
+        _context.ImageFiles.Remove(imageFile);
+        await _context.SaveChangesAsync(cancellationToken);
+        return imageFile;
     }
 }

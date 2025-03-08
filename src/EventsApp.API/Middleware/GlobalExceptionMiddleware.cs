@@ -1,4 +1,6 @@
 using System.Net;
+using EventsApp.Domain.Exceptions;
+using EventsApp.Domain.Models;
 
 namespace EventsApp.API.Middleware;
 
@@ -24,15 +26,16 @@ public class GlobalExceptionMiddleware
             var (statusCode, errorMessage) = ex switch
             {
                 InvalidOperationException operationEx => (HttpStatusCode.BadRequest, operationEx.Message),
+                NotFoundException notFoundEx => (HttpStatusCode.NotFound, notFoundEx.Message),
+                OperationCanceledException canceledEx => (HttpStatusCode.RequestTimeout, canceledEx.Message),
                 _ => (HttpStatusCode.InternalServerError, "Необработанная ошибка сервера")
             };
             
             context.Response.StatusCode = (int) statusCode;
             context.Response.ContentType = "application/json";
 
-            var response = new
+            var response = new ErrorResponse
             {
-                StatusCode = statusCode,
                 ErrorMessage = errorMessage,
                 Trace = ex.StackTrace
             };

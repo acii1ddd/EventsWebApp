@@ -1,14 +1,14 @@
-using EventsApp.Domain.Models.RefreshTokens;
+using EventsApp.DAL.Entities;
 
 namespace EventsApp.DAL.Interfaces;
 
 public interface IRefreshTokenRepository
 {
-    public Task<RefreshTokenModel> AddAsync(RefreshTokenModel refreshTokenModel);
+    public Task<RefreshTokenEntity> AddAsync(RefreshTokenEntity refreshTokenModel, CancellationToken cancellationToken);
     
-    public Task<RefreshTokenModel?> DeleteByIdAsync(Guid id);
+    public Task<RefreshTokenEntity> DeleteAsync(RefreshTokenEntity refreshToken, CancellationToken cancellationToken);
     
-    public Task<RefreshTokenModel?> GetByTokenAsync(string refreshToken);
+    public Task<RefreshTokenEntity?> GetByTokenAsync(string refreshToken, CancellationToken cancellationToken);
 
-    public Task<RefreshTokenModel?> GetByUserIdAsync(Guid userId);
+    public Task<RefreshTokenEntity?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken);
 }

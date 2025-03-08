@@ -1,10 +1,10 @@
-using EventsApp.Domain.Models.Participants;
+using EventsApp.DAL.Entities;
 
 namespace EventsApp.DAL.Interfaces;
 
 public interface IUserRepository
 {
-    public Task<UserModel?> GetByIdAsync(Guid id);
+    public Task<UserEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
     
-    public Task<UserModel?> GetByEmailAsync(string email);
+    public Task<UserEntity?> GetByEmailAsync(string email, CancellationToken cancellationToken);
 }

@@ -2,7 +2,7 @@ using AutoMapper;
 using EventsApp.DAL.Entities;
 using EventsApp.Domain.Models.Events;
 
-namespace EventsApp.DAL.MappingProfiles;
+namespace EventsApp.BLL.MappingProfiles;
 
 public class EventProfile : Profile
 {

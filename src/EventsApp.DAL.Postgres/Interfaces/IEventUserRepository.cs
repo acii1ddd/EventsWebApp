@@ -1,12 +1,12 @@
-using EventsApp.Domain.Models.EventUsers;
+using EventsApp.DAL.Entities;
 
 namespace EventsApp.DAL.Interfaces;
 
 public interface IEventUserRepository
 {
-    public Task<EventUserModel?> GetByEventAndUserIdAsync(Guid eventId, Guid userId);
+    public Task<EventUserEntity?> GetByEventAndUserIdAsync(Guid eventId, Guid userId, CancellationToken cancellationToken);
     
-    public Task<EventUserModel> AddAsync(EventUserModel eventUserModel);
-    
-    public Task<EventUserModel?> DeleteByEventAndUserIdAsync(Guid eventId, Guid userId);
+    public Task<EventUserEntity> AddAsync(EventUserEntity eventUserModel, CancellationToken cancellationToken);
+
+    public Task<EventUserEntity> DeleteEventUserAsync(EventUserEntity eventUserEntity, CancellationToken cancellationToken);
 }
