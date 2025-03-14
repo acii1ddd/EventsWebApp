@@ -17,5 +17,7 @@ Start-up instructions:
 7. Go to http://localhost:5555/swagger/index.html
 
 You can register or use initialized accounts:
+
 User Account:     email: user.com, password: TestPassword
+
 Admin Account:    email: admin.com, password: TestPassword
