@@ -1,8 +1,8 @@
 using AutoMapper;
+using EventsApp.BLL.Exceptions;
 using EventsApp.BLL.Interfaces;
 using EventsApp.DAL.Entities;
 using EventsApp.DAL.Interfaces;
-using EventsApp.Domain.Exceptions;
 using EventsApp.Domain.Models;
 using EventsApp.Domain.Models.Events;
 using EventsApp.Domain.Models.EventUsers;
@@ -36,7 +36,8 @@ public class EventService : IEventService
         _mapper = mapper;
     }
 
-    public async Task<PaginatedList<EventModel>> GetAllAsync(int pageIndex, int pageSize, CancellationToken cancellationToken)
+    public async Task<PaginatedList<EventModel>> GetAllAsync(int pageIndex, int pageSize, 
+        CancellationToken cancellationToken)
     {
         var paginatedEventEntities = await _eventRepository.GetAllAsync(pageIndex, pageSize, cancellationToken);
         var paginatedEvents = _mapper.Map<PaginatedList<EventModel>>(paginatedEventEntities);
@@ -85,7 +86,8 @@ public class EventService : IEventService
     /// <param name="imageFile"></param>
     /// <param name="cancellationToken"></param>
     /// <returns>Добавленное событие и его изображение</returns>
-    public async Task<EventModel> AddAsync(EventModel eventModel, IFormFile? imageFile, CancellationToken cancellationToken)
+    public async Task<EventModel> AddAsync(EventModel eventModel, IFormFile? imageFile, 
+        CancellationToken cancellationToken)
     {
         var eventId = Guid.NewGuid();
         eventModel.Id = eventId;
@@ -110,7 +112,8 @@ public class EventService : IEventService
         return result;
     }
     
-    public async Task<EventModel> UpdateAsync(EventModel eventModel, IFormFile imageFile, CancellationToken cancellationToken)
+    public async Task<EventModel> UpdateAsync(EventModel eventModel, IFormFile imageFile,
+        CancellationToken cancellationToken)
     {
         if (await _eventRepository.GetByIdAsync(eventModel.Id, cancellationToken) is null)
         {
@@ -223,7 +226,8 @@ public class EventService : IEventService
         return participants;
     }
 
-    public async Task<UserModel> GetParticipantByIdAsync(Guid eventId, Guid userId, CancellationToken cancellationToken)
+    public async Task<UserModel> GetParticipantByIdAsync(Guid eventId, Guid userId, 
+        CancellationToken cancellationToken)
     {
         var eventUser = await GetEventUserAsync(eventId, userId, cancellationToken);
         if (eventUser is null)
@@ -247,7 +251,8 @@ public class EventService : IEventService
         _ = await _eventUserRepository.DeleteEventUserAsync(_mapper.Map<EventUserEntity>(eventUser), cancellationToken);
     }
     
-    private async Task<EventUserModel?> GetEventUserAsync(Guid eventId, Guid userId, CancellationToken cancellationToken)
+    private async Task<EventUserModel?> GetEventUserAsync(Guid eventId, Guid userId, 
+        CancellationToken cancellationToken)
     {
         if (await _eventRepository.GetByIdAsync(eventId, cancellationToken) is null)
         {

@@ -1,5 +1,5 @@
 using System.Net;
-using EventsApp.Domain.Exceptions;
+using EventsApp.BLL.Exceptions;
 using EventsApp.Domain.Models;
 
 namespace EventsApp.API.Middleware;
@@ -28,6 +28,7 @@ public class GlobalExceptionMiddleware
                 InvalidOperationException operationEx => (HttpStatusCode.BadRequest, operationEx.Message),
                 NotFoundException notFoundEx => (HttpStatusCode.NotFound, notFoundEx.Message),
                 OperationCanceledException canceledEx => (HttpStatusCode.RequestTimeout, canceledEx.Message),
+                UnauthorizedAccessException unauthorizedEx => (HttpStatusCode.Unauthorized, unauthorizedEx.Message),
                 _ => (HttpStatusCode.InternalServerError, "Необработанная ошибка сервера")
             };
             
