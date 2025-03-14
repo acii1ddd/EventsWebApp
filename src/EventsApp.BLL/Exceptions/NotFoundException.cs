@@ -1,4 +1,4 @@
-namespace EventsApp.Domain.Exceptions;
+namespace EventsApp.BLL.Exceptions;
 
 public class NotFoundException : Exception
 {

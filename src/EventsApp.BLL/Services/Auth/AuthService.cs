@@ -1,9 +1,9 @@
 using AutoMapper;
+using EventsApp.BLL.Exceptions;
 using EventsApp.BLL.Interfaces.Auth;
 using EventsApp.Configuration;
 using EventsApp.DAL.Entities;
 using EventsApp.DAL.Interfaces;
-using EventsApp.Domain.Exceptions;
 using EventsApp.Domain.Models.Auth;
 using EventsApp.Domain.Models.Participants;
 using EventsApp.Domain.Models.RefreshTokens;
@@ -152,5 +152,20 @@ public class AuthService : IAuthService
             .DeleteAsync(_mapper.Map<RefreshTokenEntity>(refreshTokenModel), cancellationToken);
         
         _logger.LogInformation("Сущность токена {token} успешно удалена", refreshTokenModel.Token);
+    }
+
+    public async Task SignUpAsync(UserModel userModel, CancellationToken cancellationToken)
+    {
+        if (await _userRepository.GetByEmailAsync(userModel.Email, cancellationToken) is not null)
+        {
+            throw new InvalidOperationException($"Пользователь с Email {userModel.Email} уже существует");
+        }
+        
+        userModel.Id = Guid.NewGuid();
+        userModel.PasswordHash = _passwordHashService.HashPassword(userModel.PasswordHash);
+        userModel.BirthDate = userModel.BirthDate.ToUniversalTime();
+        userModel.Role = UserRole.Default;
+        
+        await _userRepository.AddAsync(_mapper.Map<UserEntity>(userModel), cancellationToken);
     }
 }

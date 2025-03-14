@@ -1,8 +1,10 @@
 using AutoMapper;
 using EventsApp.API.Contracts.Auth;
+using EventsApp.API.Contracts.Users;
 using EventsApp.BLL.Interfaces.Auth;
 using EventsApp.Domain.Models;
 using EventsApp.Domain.Models.Auth;
+using EventsApp.Domain.Models.Participants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -35,11 +37,7 @@ public class AccountController : BaseController
         // пользователь уже авторизован
         if (AuthorizedUserId != Guid.Empty)
         {
-            return BadRequest(new ErrorResponse
-            {
-                ErrorMessage = $"Пользователь с email {request.Email} уже авторизован",
-                Trace = string.Empty
-            });
+            throw new InvalidOperationException($"Пользователь с email {request.Email} уже авторизован");
         }
         
         var signInModel = _mapper.Map<SignInModel>(request); 
@@ -62,7 +60,7 @@ public class AccountController : BaseController
         var refreshToken = Request.Cookies[RefreshTokenKey];
         if (refreshToken is null)
         {
-            return Unauthorized(); // need to relogin
+            throw new UnauthorizedAccessException("Refresh token не найден в cookie"); // need to relogin
         }
 
         var authTokenModel = await _authService.GetNewTokensPairAsync(refreshToken, cancellationToken);
@@ -83,7 +81,7 @@ public class AccountController : BaseController
         var refreshToken = Request.Cookies[RefreshTokenKey];
         if (refreshToken is null)
         {
-            return BadRequest("Refresh token пользователя истек");
+            throw new InvalidOperationException("Refresh token пользователя истек");
         }
         
         await _authService.LogoutAsync(refreshToken, cancellationToken);
@@ -91,7 +89,22 @@ public class AccountController : BaseController
         return Ok();
     }
     
-    // TODO: регистрация
+    [AllowAnonymous]
+    [HttpPost("sign-up")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResponse))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse))]
+    public async Task<IActionResult> SignUp(SignUpRequest request,CancellationToken cancellationToken)
+    {
+        if (AuthorizedUserId != Guid.Empty)
+        {
+            throw new InvalidOperationException("Пользователь уже авторизован");
+        }
+        
+        var userModel = _mapper.Map<UserModel>(request);
+        await _authService.SignUpAsync(userModel, cancellationToken);
+        return Ok(new { UserId = userModel.Id });
+    }
     
     private void SetRefreshTokenToCookie(string refreshToken)
     {
