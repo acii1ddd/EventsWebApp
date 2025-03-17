@@ -88,8 +88,13 @@ public class AuthService : IAuthService
         };
     }
 
-    public async Task<AuthTokenModel> GetNewTokensPairAsync(string refreshToken, CancellationToken cancellationToken)
+    public async Task<AuthTokenModel> GetNewTokensPairAsync(string? refreshToken, CancellationToken cancellationToken)
     {
+        if (refreshToken is null)
+        {
+            throw new UnauthorizedAccessException("Refresh token не найден в cookie"); // need to relogin
+        }
+        
         var refreshTokenModel = _mapper.Map<RefreshTokenModel>(await _refreshTokenRepository
             .GetByTokenAsync(refreshToken, cancellationToken));
         
@@ -137,8 +142,14 @@ public class AuthService : IAuthService
         };
     }
 
-    public async Task LogoutAsync(string refreshToken, CancellationToken cancellationToken)
+    public async Task LogoutAsync(string? refreshToken, CancellationToken cancellationToken)
     {
+        // refresh token пользователя истек
+        if (refreshToken is null)
+        {
+            throw new InvalidOperationException("Refresh token пользователя истек");
+        }
+        
         var refreshTokenModel = _mapper.Map<RefreshTokenModel>(await _refreshTokenRepository
             .GetByTokenAsync(refreshToken, cancellationToken));
         
