@@ -34,12 +34,6 @@ public class AccountController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse))]
     public async Task<IActionResult> SignIn([FromBody] SignInRequest request, CancellationToken cancellationToken)
     {
-        // пользователь уже авторизован
-        if (AuthorizedUserId != Guid.Empty)
-        {
-            throw new InvalidOperationException($"Пользователь с email {request.Email} уже авторизован");
-        }
-        
         var signInModel = _mapper.Map<SignInModel>(request); 
         var authTokenModel = await _authService.SignIn(signInModel, cancellationToken);
         
@@ -57,13 +51,7 @@ public class AccountController : BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> RefreshTokens(CancellationToken cancellationToken)
     {
-        var refreshToken = Request.Cookies[RefreshTokenKey];
-        if (refreshToken is null)
-        {
-            throw new UnauthorizedAccessException("Refresh token не найден в cookie"); // need to relogin
-        }
-
-        var authTokenModel = await _authService.GetNewTokensPairAsync(refreshToken, cancellationToken);
+        var authTokenModel = await _authService.GetNewTokensPairAsync(Request.Cookies[RefreshTokenKey], cancellationToken);
         SetRefreshTokenToCookie(authTokenModel.RefreshToken);
         var result = _mapper.Map<SignInResponse>(authTokenModel.AuthAccessTokenModel);
         return Ok(result);
@@ -77,14 +65,7 @@ public class AccountController : BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Logout(CancellationToken cancellationToken)
     {
-        // refresh token пользователя истек
-        var refreshToken = Request.Cookies[RefreshTokenKey];
-        if (refreshToken is null)
-        {
-            throw new InvalidOperationException("Refresh token пользователя истек");
-        }
-        
-        await _authService.LogoutAsync(refreshToken, cancellationToken);
+        await _authService.LogoutAsync(Request.Cookies[RefreshTokenKey], cancellationToken);
         Response.Cookies.Delete(RefreshTokenKey);
         return Ok();
     }
@@ -96,11 +77,6 @@ public class AccountController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse))]
     public async Task<IActionResult> SignUp(SignUpRequest request,CancellationToken cancellationToken)
     {
-        if (AuthorizedUserId != Guid.Empty)
-        {
-            throw new InvalidOperationException("Пользователь уже авторизован");
-        }
-        
         var userModel = _mapper.Map<UserModel>(request);
         await _authService.SignUpAsync(userModel, cancellationToken);
         return Ok(new { UserId = userModel.Id });
